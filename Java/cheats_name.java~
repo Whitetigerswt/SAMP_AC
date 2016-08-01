@@ -1,0 +1,2755 @@
+
+
+import com.twmacinta.util.MD5;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
+import java.net.BindException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.concurrent.TimeUnit;
+import org.apache.commons.codec.digest.DigestUtils;
+
+
+// on website MD5 checks for processes and injected librarys 
+// filecontainsstring in getinjectedlibrarysall ONLY and not any other thread for speed.
+// md5 file function - speed it up by putting it in the .dll
+// eady
+
+
+/**
+ *
+ * @author My Account
+ * 
+ */
+
+
+
+public class SAMP_AC extends javax.swing.JFrame {
+
+    /**
+     * @param args the command line arguments
+     */
+    //public interface ac {
+		// UPDATE `AC_Players` SET `AppRunning` = 0 WHERE `AppRunning` = 1
+        static String nick = Registry.readRegistry("HKEY_CURRENT_USER\\Software\\SAMP", "PlayerName", "REG_SZ");
+        /*static String url = "jdbc:mysql://pyxis.volt-host.com:3306/1574_GTAFC";
+        static String user = "1574_GTAFC";
+        static String password = "UsN3rIvT4EDH";*/
+        static String hardwareid = DigestUtils.md5Hex(Serial.getSerialNumber() + " " + Serial.getMotherboardSN() + CPU.getCPUName() + CPU.getCPUSpeed() + Serial.getGFXCard() + Serial.getGFXCardRAM() + Serial.getTotalRAM() + " dgrFsvbghjrdfghtrdhdasdvgxfghR##$");
+        static String notencrypted = Serial.getSerialNumber( true ) + Serial.getMotherboardSN() + Serial.getCPUSerial() + Serial.getBIOSSerial( true ) + Serial.getHDDSerial();
+        static String hardwareid2 = DigestUtils.md5Hex(notencrypted);
+        
+        static String ip = QueryHandler.getMyPublicIP();
+        static final double ver = 1.75;
+        static int afk = 0;
+        static Toolkit tk = Toolkit.getDefaultToolkit();
+        static boolean hasASI = false, hasTrainer = false;
+        static String installdir;
+        static boolean watchForBan = false;
+        static String session = "";
+        static String dll = "samp_ac_x86";
+        static String sampacdllhash = "";
+        static String ourexehash = "";
+        static String scannedMD5s = "";
+        public static int pulsed;
+        static boolean gta_sa_exe_kick = false;
+        static String[] arr = { "anim/ped.ifp",             // file_0
+                                "data/carmods.dat",         // file_1
+                                "data/animgrp.dat",         // file_2
+                                "data/melee.dat",           // file_3
+                                "data/clothes.dat",         // file_4
+                                "data/object.dat",          // file_5
+                                "data/default.dat",         // file_6
+                                "data/surface.dat",         // file_7
+                                "data/default.ide",         // file_8
+                                "data/gta.dat",             // file_9
+                                "data/surfinfo.dat",        // file_10
+                                "data/peds.ide",            // file_11
+                                "data/vehicles.ide",        // file_12
+                                "data/water.dat",           // file_13
+                                "data/txdcut.ide",          // file_14
+                                "data/water1.dat",          // file_15
+                                "models/coll/weapons.col",  // file_16
+                                "data/plants.dat",          // file_17
+                                "data/furnitur.dat",        // file_18
+                                "data/procobj.dat",         // file_19
+                                "data/handling.cfg",        // file_20
+                                "models/coll/peds.col",     // file_21
+                                "models/coll/vehicles.col", // file_22
+                                "samp.saa",                 // file_23
+                                "samp.exe",                 // file_24
+                                "vorbis.dll",               // file_25
+                                "data/pedstats.dat",        // file_26
+                                "data/ar_stats.dat" };      // file_27
+        
+        static String[] hash = { "4736b2c90b00981255f9507308ee9174", // anim/ped.ifp                | file_0
+                                 "6cbe845361e76aae35ddca300867cadf", // data/carmods.dat            | file_1
+                                 "6a484b0b2356c524207d939487f1bff1", // data/animgrp.dat            | file_2
+                                 "b2f05657980e4a693f8ff5eadcbad8f8", // data/melee.dat              | file_3
+                                 "8762637e580eb936111859ffa29bddb4", // data/clothes.dat            | file_4
+                                 "46a5e7dff90078842e24d9de5e92cc3e", // data/object.dat             | file_5
+                                 "8e133355396761bd5cd16bf873154b30", // data/default.dat            | file_6
+                                 "9eb4e4e474abd5da2f3961a5ef549f9e", // data/surface.dat            | file_7
+                                 "5b6d75bae827e2d88f24f2be66a037bb", // data/default.ide            | file_8
+                                 "2d2e4f7f05e2d82b25c88707096d3393", // data/gta.dat                | file_9
+                                 "605dd0beabccc797ce94a51a3e4a09eb", // data/surfinfo.dat           | file_10
+                                 "f7dea69fa6ab973479b9ef0cf05d3d98", // data/peds.ide               | file_11
+                                 "bdc3a0fced2402c5bc61585714457d4b", // data/vehicles.ide           | file_12
+                                 "690400ecc92169d9eaddaaa948903efb", // data/water.dat              | file_13
+                                 "e3c231039048a30680b8f13fb51cc4ac", // data/txdcut.ide             | file_14
+                                 "16fe5a3e8c57d02eb62a44a96d8b9d39", // data/water1.dat             | file_15
+                                 "510e74e32b323eee54dd7a243b073808", // models/coll/weapons.col     | file_16
+                                 "a2713338dbbd55898a4195e4464c6b06", // data/plants.dat             | file_17
+                                 "3199fc8b81a4c5334a497508fe408afd", // data/furnitur.dat           | file_18
+                                 "7229fa03d65f135bd569c3692d67c4b3", // data/procobj.dat            | file_19
+                                 "6868accef933f1855ec28ce193a78159", // data/handling.cfg           | file_20
+                                 "74288cbdd843c3cfb77b036a5614ae9d", // models/coll/peds.col        | file_21
+                                 "c84c1a1b67d5fad3df75dd8d45fc576b", // models/coll/vehicles.col    } file_22
+                                 "810e2b066e0f28ad21f33d3e281d2b5f", // samp.saa                    | file_23
+                                 "2f4614683ba833b75251ac4dad8b28ad", // samp.exe                    | file_24
+                                 "2840f08dd9753a5b13c60d6d1c165c9a", // vorbis.dll                  | file_25
+                                 "d722c90c92f3ad5c1b531596769f61cd", // data/pedstats.dat           | file_26
+                                 "a98936b0f3523f23cad2eacc0eaf7a9b"  // data/ar_stats.dat           | file_27
+                                 //"2b7b803311d2b228f065c45d13e1aeb2"  // vorbisfile.dll              | file_??
+        };
+        
+        static File[] fileHandler = new File[arr.length+3];
+        
+        static String[] dllHash = { // samp.dll md5
+            
+	    "aba32dd8a9e904a21a66b46b7d31d8f1", // 0.3x R1-2 kyetard
+            "4ae9841419ff9bdec4024b8bfaa1c7d6", // 0.3x-R1-2
+            "36c7eaf51b7e477a121521ce0fa003ac", // 0.3x
+            "07012dc468f2b89db2584e358a048e39", // 0.3e
+            "f11ff91ab18484f8fecefb28b06556d4", // 0.3d 
+            "14d255c662ac58ce3dd757b7e8b92fb8"  // 0.3d R2
+                
+        };
+        
+        static String[] surfInfoHash = { 
+            
+            "605dd0beabccc797ce94a51a3e4a09eb", // Original surfinfo.dat
+            "1ef27e99d434d2252a6dce0b018c5fe6"  // Luk_Ass's no dust edit
+                
+        };
+        
+        static String[] sampsaa = { 
+
+            "693b1497e7ce89869c24a43a3ff8e836", // 0.3e & 0.3x
+            "810e2b066e0f28ad21f33d3e281d2b5f"  // 0.3d & 0.3d R2
+                
+        };
+        
+        static String[] sampexe = { // samp.exe md5
+            
+            "035dff67a86995de5fe943620adc8b9b", // 0.3x R1-2
+            "0458ce157cf57fa8809fb9adb6384660", // 0.3x
+            "c06568d52fecd2f97b7aaab911a83959", // 0.3e
+            "2f4614683ba833b75251ac4dad8b28ad"  // 0.3d & 0.3d R2
+                
+        };
+        
+        static String[] vorbisfileHash = {
+            "2b7b803311d2b228f065c45d13e1aeb2", // default file hash
+            "6749a6f6886a9646c23bcbc7da412633", // ASI Loader ( http://spelsajten.net/asi.zip )
+            "fbe34f162166fea391a3f74ff4701a25"  // ASI Loader
+        };
+   
+        static String[] exeHash = { 
+            "6c6160da9b175b66cf9127c86be57bf7", 
+            "170b3a9108687b26da2d8901c6948a18", 
+            "68ba9ec43813ad58e39d64f88ebdc6a6", 
+            "c8a31567f7279889cff09e49f3b8ce7a", 
+            "842c61a45ace7638ff1e85d1f7a38545", 
+            "12cc5f78cf7db2d635c13abd9b2799f6",  // timecyc.aaa exe
+            "8a3ff2c40e64ecb8ebe9a51d36b18b21",
+            "0bfc9ecd5398cbef80ff7afc51620a45",
+            "2b5066bd4097ac2944ce6a9cf8fe5677",
+            "e7697a085336f974a4a6102a51223960" // unmodded exe (al_pacino)
+        };
+        
+        public static final int DEBUG = 0;
+        public static final int SAMPSUPPORTED = 1;
+        public static final int THREAD_WAIT = 5;
+        public static TrayIcon trayIcon;
+        
+    //}
+    //public static void loadFrame() { new initComponents(); }
+    public static void main( String[] args ) { 
+        
+        
+        if(SystemTray.isSupported()) {
+            SystemTray systray = SystemTray.getSystemTray();
+            
+            
+            InputStream is = SAMP_AC.class.getResourceAsStream("images/ac.png");
+            BufferedInputStream bis = new BufferedInputStream(is);
+            byte[] byBuf = new byte[10000];
+
+            Image image = null;
+            try {
+                bis.read(byBuf, 0, 10000);
+                image = Toolkit.getDefaultToolkit().createImage(byBuf);
+            } catch(Exception e) { e.printStackTrace(); }
+            
+            ActionListener exitListener = new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    System.exit(0);
+                }
+            };
+                    
+            PopupMenu popup = new PopupMenu();
+            MenuItem defaultItem = new MenuItem("Exit");
+            defaultItem.addActionListener(exitListener);
+            popup.add(defaultItem);
+            
+            trayIcon = new TrayIcon(image, "Whitetiger's Anti-Cheat", popup);
+
+            trayIcon.setImageAutoSize(true);
+
+            try {
+                systray.add(trayIcon);
+                
+                trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                "Whitetiger's Anti-Cheat has started successfully.",
+                TrayIcon.MessageType.INFO);
+                
+            } catch (AWTException e) {
+                System.err.println("TrayIcon could not be added.");
+           }   
+        }
+        
+        File f = new File(cplusplus.GetOurFileName());
+
+        try {
+            ourexehash = MD5.asHex(MD5.getHash(f));
+        } catch(IOException e) { }
+            
+        QueryHandler.requestUpdate();
+        
+        checkIfRunning();
+        
+        if(cplusplus.IsVM() == true) {
+            println("This application will not run on a Virtual Machine.");
+            println("Closing in 10 seconds.");
+            trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "This application will not run on a Virtual Machine, Closing.",
+                                TrayIcon.MessageType.ERROR);
+            stopThreadTemp(10000);
+            System.exit(0);
+        }
+       
+        try {
+            String val = Registry.readRegistry("HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Control\\SystemInformation", "SystemProductName", "REG_SZ");
+            
+            if(val.contains("VirtualBox") == true) {
+                println("This application will not run on a Virtual Machine.");
+                trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "This application will not run on a Virtual Machine, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                println("Closing in 10 seconds.");
+                stopThreadTemp(10000);
+                System.exit(0);
+            }
+        } catch(Exception e) { }
+        
+        try {
+            PrintWriter out = new PrintWriter(new FileWriter( System.getProperty("user.dir") + "\\ac_log.txt", true));
+            out.println("\n ------ SAMP_AC v" + ver + " started on " + new java.util.Date().toString());
+            out.close();
+        } catch(Exception e) { } 
+        
+        
+        
+        if(nick == null) {
+            println("We've detected you don't even have SA-MP installed, or maybe a firewall is blocking the application");
+            println("There could be a more serious problem with your system, try double checking that the registry is enabled.");
+            println("If the registry is disabled, enable it, connect to a server and restart this application");
+            println("If your registry can't be enabled for whatever reason, you may have a virus.");
+            println("We're done here.");
+            println("Closing in 10 seconds.");
+            trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Check ac_log.txt for more info, Closing.",
+                                TrayIcon.MessageType.ERROR);
+            println("The information on this close will be uploaded so it can be determined if it is a bug with the anti-cheat!");
+            
+            File ff = null;   
+            try {
+                ff = File.createTempFile("error" + System.currentTimeMillis(), ".txt");
+            } catch(Exception e) { }    
+            ff.deleteOnExit();
+            
+            PrintWriter out = null;
+            try {
+                out = new PrintWriter(ff.getAbsolutePath());
+                out.println("error message: We've detected you don't even have SA-MP installed, or maybe a firewall is blocking");
+                out.println("The registry could not be accessed, what most likely occured is sa-mp is not installed, or a firewall is blocking it.");
+                out.println("Solution: make sure sa-mp is installed, and has been launched at least once, or disable firewall.");
+                out.println("SAMP_AC Version: " + ver);
+            } catch(Exception e) { }  
+            finally {
+                out.close();
+            }
+            
+            
+            
+            QueryHandler.handleFileUpload(ff.getAbsolutePath(), "errorlog/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "errorlog.txt", true);
+            ff.delete();
+            
+            stopThreadTemp(10000);
+            System.exit(0);
+        }
+        if(DEBUG == 0) {
+            println("Welcome to the Whitetiger's Anti-Cheat " + String.format("%.02f", ver) + " by Whitetiger");
+            println(" ");
+        } else {
+            println("SAMP_AC: Debug = 1");
+        }    
+        
+        checkForBan();
+
+        println("Please Wait...");    
+        
+        QueryHandler.requestDataFiles(); 
+        
+        
+        Runtime.getRuntime().addShutdownHook(new Thread() { 
+            @Override 
+            public void run() { 
+                QueryHandler.sendShutdown();
+                PrintWriter out = null;
+                File ff = null;
+                try {
+                    ff = File.createTempFile("" + System.currentTimeMillis(), ".txt");
+                    ff.deleteOnExit();
+                    out = new PrintWriter(new FileWriter(ff.getAbsolutePath()));
+                } catch(Exception e) { }
+                out.println("Pulsed pulse.php " + QueryHandler.pulsed + " times in this session (approx " + calculateTime(QueryHandler.pulsed * 20) + ")");
+                QueryHandler.handleFileUpload(ff.getAbsolutePath(), "info/" + GetIPAndPort() + "/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "pulsed_" + SAMP_AC.nick + "_" + System.currentTimeMillis() + ".txt", true);
+            }
+        });
+       
+        try {
+            File ff = File.createTempFile("" + System.currentTimeMillis(), ".txt");
+            ff.deleteOnExit();
+            PrintWriter out = new PrintWriter(new FileWriter(ff.getAbsolutePath()));
+            out.println("" + System.currentTimeMillis());
+            out.close();
+            
+            session = MD5.asHex(MD5.getHash(ff));
+            ff.delete();
+            
+        } catch(Exception e) {
+            println("Failed to create file.");
+        }    
+        
+        // windows vista/7 FTP bug fix
+        try {
+            if(System.getProperty("os.name").equals("Windows XP")) {
+                Process p = Runtime.getRuntime().exec("netsh firewall delete allowedprogram \"" + cplusplus.GetOurFileName() + "\"");
+                p.waitFor();
+                p = Runtime.getRuntime().exec("netsh firewall add allowedprogram program=\"" + cplusplus.GetOurFileName() + "\" name=\"SAMP_AC\" mode=ENABLE scope=ALL profile=ALL");
+                p.waitFor();
+            } else {
+                Process p = Runtime.getRuntime().exec("netsh advfirewall firewall delete rule name=\"SAMP_AC\"");
+                p.waitFor();
+                p = Runtime.getRuntime().exec("netsh advfirewall firewall add rule name=\"SAMP_AC\" dir=in action=allow program=\"" + cplusplus.GetOurFileName() + "\" enable=yes remoteip=any profile=public,private");
+                p.waitFor();
+            }    
+            // stateful FTP not needed anymore
+            //Runtime.getRuntime().exec("netsh advfirewall set global StatefulFTP disable");
+        } catch(Exception e) {
+            println("Fucked up error just occured, report this: " + e.toString());
+        }  
+
+        if(notencrypted.equals("null")) {
+            println("7");  
+            notencrypted = Serial.getSerialNumber(true);
+            
+            String placeholder = Serial.getMotherboardSN();
+            if(!placeholder.equals("null")) {
+                notencrypted += placeholder;
+            }
+            
+            placeholder = Serial.getHDDSerial();
+            if(!placeholder.equals("null")) {
+                notencrypted += placeholder;
+            }
+            
+            placeholder = Serial.getCPUSerial();
+            if(!placeholder.equals("null")) {
+                notencrypted += placeholder;
+            }
+            placeholder = Serial.getBIOSSerial();
+            if(!placeholder.equals("null")) {
+                notencrypted += placeholder;
+            } 
+            placeholder = Serial.getBIOSSerial(true);
+            if(!placeholder.equals("null")) {
+                notencrypted += placeholder;
+            }
+            
+            
+            if(notencrypted.equals("null")) {
+                // really now? let's at least get the MAC address, fuck.
+                notencrypted = Serial.getMacAddress();
+                if(notencrypted.equals("null")) {
+                    notencrypted = "we tried really hard to get a value for this, but in the end, failed.";
+                }
+            }
+            
+            hardwareid2 = DigestUtils.md5Hex(notencrypted);
+               
+        }
+        
+        try { 
+            printGtaFiles( );
+            
+        } catch(Exception e) {
+            println("SOME MAJOR SHIT JUST FUCKING HAPPEND!");
+            println(e.toString());
+            
+            File ff = null;   
+            try {
+                ff = File.createTempFile("error" + System.currentTimeMillis(), ".txt");
+            } catch(Exception ee) { }    
+            ff.deleteOnExit();
+            PrintWriter out = null;
+            try {
+                out = new PrintWriter(ff.getAbsolutePath());
+                out.println("error message: SOME MAJOR SHIT JUST FUCKING HAPPEND!");
+                out.println(SAMP_AC.getStackTrace(e));
+                out.println("Solution: turn off firewall(s)");
+                out.println("SAMP_AC Version: " + ver);
+                out.close();
+            } catch(Exception ee) { }  
+            finally {
+                out.close();
+            }
+
+            QueryHandler.handleFileUpload(ff.getAbsolutePath(), "errorlog/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "errorlog.txt", true);
+            ff.delete();
+                            
+            stopThreadTemp(10000);
+            System.exit(0);
+        }     
+
+        QueryHandler.sendInsertPlayer(nick, GetIPAndPort());
+        
+        checkCheatSignatures( ); 
+        
+        queryBugFix( );
+        
+        println("Confirmed! You're ready to play.");
+        println("Closing this window will stop the anti cheat.");
+        
+        trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                "You're ready to play.",
+                TrayIcon.MessageType.INFO);
+
+        doLoop( true );
+    }
+
+    public static void checkForUpdate() {
+        
+        
+    }
+    
+
+    public static void doLoop( boolean num ) {
+        
+        if(DEBUG == 1) {
+            println("doLoop");
+        }
+        do {
+            if(nick.length() == 0) {
+                nick = Registry.readRegistry("HKEY_CURRENT_USER\\Software\\SAMP", "PlayerName", "REG_SZ");
+            }
+            getGTADir();
+
+            final Thread thread = new Thread() {
+                @Override
+                public void run() { 
+                    String loopfile;
+
+                    hasTrainer      = false; 
+                    hasASI          = false;
+
+                    java.util.List<String> list = new ArrayList<String>();
+
+                    try {
+                        if(DEBUG == 1) {
+                            System.out.println("About to get running processes.");
+                        }
+                        list = Processes.listRunningProcesses();
+                        if(DEBUG == 1) {
+                            System.out.println("Done.");
+                        }
+                        //System.out.println( cplusplus.GetInjectedLibrarysAll() );
+                        
+                        if(list.get(0) == null) {
+                            println("Well, we failed to get running processes, And I don't trust you");
+                            println("We're done here");
+                            println("Closing in 10 seconds.");
+                            trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Could not get running processes, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                            println("The information on this close will be uploaded so it can be determined if it is a bug with the anti-cheat!");
+            
+                            File ff = null;   
+                            try {
+                                ff = File.createTempFile("error" + System.currentTimeMillis(), ".txt");
+                            } catch(Exception e) { }    
+                            ff.deleteOnExit();
+                            PrintWriter out = new PrintWriter(ff.getAbsolutePath());
+                            try {
+                                out.println("error message: Well, we failed to get running processes, And I don't trust you");
+                                out.println("firewall must be blocking cscript.exe? other than that, I have no idea");
+                                out.println("Solution: turn off firewall(s)");
+                                out.println("SAMP_AC Version: " + ver);
+                                out.close();
+                            } catch(Exception e) { } 
+                            finally {
+                                out.close();
+                            }
+
+                            QueryHandler.handleFileUpload(ff.getAbsolutePath(), "errorlog/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "errorlog.txt", true);
+                            ff.delete();
+                            
+                            stopThreadTemp(10000);
+                            System.exit(0);
+                        }
+                    } catch(Exception e) {
+                        println("Well, we failed to get running processes, And I don't trust you");
+                        println("We're done here");
+                        println("Closing in 10 seconds.");
+                        trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Could not get running processes, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                        println("The information on this close will be uploaded so it can be determined if it is a bug with the anti-cheat!");
+                        
+                        File ff = null;   
+                        try {
+                            ff = File.createTempFile("error" + System.currentTimeMillis(), ".txt");
+                            ff.deleteOnExit();
+                        } catch(Exception ee) { }    
+                        
+                        PrintWriter out = null;
+                        try {
+                            out = new PrintWriter(ff.getAbsolutePath());
+                            out.println("error message: Well, we failed to get running processes, And I don't trust you");
+                            out.println("Exception: " + e.toString());
+                            out.println(SAMP_AC.getStackTrace(e));
+                            out.println("Solution: ???");
+                            out.println("SAMP_AC Version: " + ver);
+                            out.close();
+                        } catch(Exception ee) { } 
+                        finally {
+                            out.close();
+                        }
+
+                        QueryHandler.handleFileUpload(ff.getAbsolutePath(), "errorlog/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "errorlog.txt", true);
+                        ff.delete();
+                        
+                        stopThreadTemp(10000);
+                        System.exit(0);
+                    }    
+                    //File processlistfile = new File ( "C:\\screen.png" );
+                    PrintWriter out = null;
+                    File ff = null;
+                    try {
+                        ff = File.createTempFile("process" + System.currentTimeMillis(), ".txt");
+
+                        ff.deleteOnExit();
+
+                        out = new PrintWriter(new FileWriter(ff.getAbsolutePath()));
+                    } catch(Exception e) {
+                        println("Failed to create a new file.");
+                        println("Closing in 10 seconds...");
+                        trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Failed to create a new file, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                        println("The information on this close will be uploaded so it can be determined if it is a bug with the anti-cheat!");
+                        File fff = null;   
+                        try {
+                            fff = File.createTempFile("error" + System.currentTimeMillis(), ".txt");
+                            fff.deleteOnExit();
+                        } catch(Exception ee) { }    
+                        
+                        PrintWriter tout = null;
+                        try {
+                            tout = new PrintWriter(fff.getAbsolutePath());
+                            tout.println("error message: Failed to create a new file.");
+                            tout.println("Exception: " + e.toString());
+                            tout.println(SAMP_AC.getStackTrace(e));
+                            tout.println("Solution: ???");
+                            tout.println("SAMP_AC Version: " + ver);
+                            tout.close();
+                        } catch(Exception ee) { } 
+                        finally {
+                            tout.close();
+                        }
+
+                        QueryHandler.handleFileUpload(fff.getAbsolutePath(), "errorlog/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "errorlog.txt", true);
+                        
+                        try {
+                            Thread.sleep(10000);
+                        } catch( Exception ee ) { }
+                        System.exit(0);
+                    }    
+                    //PrintWriter out = new PrintWriter(outFile);
+                    String completeprocessmd5 = "";
+                    String completefilenames = "";
+                    for( int i = 0, j = list.size(); i < j; ++i) {
+                        loopfile = list.get(i);
+                        String mymd5 = "0";
+                        if(loopfile == null || loopfile.equals("null")) continue;
+                        File f = null;
+                        if(!hasTrainer) {
+                            try {
+                                f = new File( loopfile );
+                                boolean isHidden = false;
+                                if( f.exists() ) {
+                                    
+                                    if(f.isHidden() && !f.getName().equals("desktop.ini") && !f.getName().equals("Thumbs.db")) {
+                                        Runtime.getRuntime().exec("attrib -H " + loopfile);
+                                        isHidden = true;
+                                    }
+
+                                    setFilePermissions(f);
+                                    
+                                    mymd5 = MD5.asHex(MD5.getHash(f));
+                                    
+                                    
+                                    if(!mymd5.equals("d812937d37b07c413ba17c05b8d33109")) {
+                                        boolean isnull = false;
+   
+                                        boolean game_exe = false;
+                                        for( int k=0, n = exeHash.length; k < n; ++k) { 
+                                            if(mymd5.equals(exeHash[k])) {
+                                                game_exe = true;
+                                            }
+                                        }
+                                        
+                                        if(loopfile.endsWith("gta_sa.exe")) {
+                                            for( int k=0, n = exeHash.length; k < n; ++k) { 
+                                                if(mymd5.equals(exeHash[k])) {
+                                                   game_exe = true;
+                                                   gta_sa_exe_kick = false;
+                                                }
+                                            }
+                                            if(!game_exe) {
+                                                gta_sa_exe_kick = true;
+                                            }
+                                        }
+                                        
+                                        if(game_exe == true) {
+                                            if(isHidden && !f.getName().equals("desktop.ini") && !f.getName().equals("Thumbs.db")) {
+                                                Runtime.getRuntime().exec("attrib +H " + loopfile);
+                                            }
+                                            continue;
+                                        }
+
+
+                                        
+                                        out.println(loopfile + " " + mymd5);
+                                        
+                                        completeprocessmd5 += mymd5 + ",";
+                                        completefilenames += f.getName() + ",";
+                                        
+            /*
+                                        if(mymd5.equals("8d375ca8e9731afa8fa2b8b4f2521f5b") || // Ezkial aimbot
+                                        mymd5.equals("33bcd74447070a7e0d12c7609d6040a2") || // lag spike program
+                                        mymd5.equals("2184980b2090c212176d11cbe665007d") || // GTA SAMP Trainer By [UG]NooB.exe
+                                        mymd5.equals("c451594327f61b41b1d3307fc4eedebf") || // MChilliPepper
+                                        mymd5.equals("3532a6075afa9316fa390452e26a5eda") || // MrAxsaray68 Aimbot
+                                        mymd5.equals("29f9137b96ef4ba2f7543287a1d9bd22") || // SA Multi-Hack
+                                        mymd5.equals("0b90e62e39ac8c30575f2fb03ef405cd") || // SA-MP G0dm0d3
+                                        mymd5.equals("20c07df0cf19e1ad1698a81b828a6ecc") || // Twister Mod v1
+                                        mymd5.equals("bc7fece1f2de80338fc608f574dcfaf6") || // Samp DragHax v1   
+                                        mymd5.equals("939296bd0e6d04d44bec07e7ade90cc8") || // DragHax_v2
+                                        mymd5.equals("dc2d223e89426ac45fe8510ffb208274") || // DragHax v3
+                                        mymd5.equals("92c633945d3a6fce9ad2cd311c8374bc") || // BulletProof.exe
+                                        mymd5.equals("4fa22b66385b12098a7491329d7967d4") || // Malagueta 2.1
+                                        mymd5.equals("56ba14ab282c30f45dd5fecccc039a96") || // SF Ping Spiker 1.2
+                                        mymd5.equals("a214d4607964f8aa0255b20add6fe5e9") || // Malagueta 2.0
+                                                // -- ADDED v1.23 --
+                                        mymd5.equals("8274a7a47b8a5ee3855e048782427e8f") || // GTA-SA Crazy Trainer.exe   
+                                        mymd5.equals("d0e6f21120ba36c39f945acb6b41792c") || // 1245832848_GTASA Trainer by DaKnOb.exe
+                                        mymd5.equals("c6812fb544aa2cacedf72a71ada65bb7") || // Dollar-Trainer.exe
+                                        mymd5.equals("c65ecae2c2c903b5fee34f70ecabee2d") || // Gta san andreas big money cheat! By ZiBBiTiiiA.exe
+                                        mymd5.equals("863d13aaaafbacd4acbe6e883dca3c05") || // GTASA-209_v1.0.1.exe
+                                        mymd5.equals("e6e6ca2c77b8b628a39d02b0f053ce6f") || // Twisted Trainer.exe
+                                        mymd5.equals("6dc3da4b50f11d11dc52be86e8084c13") || // GTA SA TRAINER BY GREEKMONSTER + 37.exe
+                                        mymd5.equals("def9800d413990e5533e8ca6c81ef02f") || // GTA SA Trainer 4x.exe
+                                        mymd5.equals("2ea39a820ee92709136088b7b566dd50") || // Gta +8 Tranier.exe
+                                        mymd5.equals("94c7c25b67b795015fea80709fdd721c") || // Gta_sa_Supertrainer_v.3.1.exe
+                                        mymd5.equals("e7cb504da4ab9b2db262ca1a2eb43cde") || // Gta_sa_Supertrainer_v.3.0.exe
+                                        mymd5.equals("5b9e41d4e0b224ebd04d072b2ab4e079") || // Gta_sa_Supertrainer_v.2.exe
+                                        mymd5.equals("d86de1341a4e4fcd1e24261a5e1772fc") || // 1187797626_GTA San Andreas Trainer.exe
+                                        mymd5.equals("4c4aadecf2cd5d6490d8c5a509da6de3") || // GTA_SA_TRAINER_V.1.0.exe
+                                        mymd5.equals("aefa1be64f02295d125c4dc083db4397") || // MaddoxX 23x Trainer.exe
+                                        mymd5.equals("bc0337202a05ea3ca271c6b9c0ea3ae1") || // GST 1.0.exe
+                                        mymd5.equals("5de939fa87e34d34f6f15697a376a5e0") || // Money Trainer.exe
+                                        mymd5.equals("bbf5d286e762f2e4f7266efc5dd49bef") || // GTA-SA Crazy Trainer.exe v1.8
+                                        mymd5.equals("db8f8c299e3dfdae27d1a4dbc4bf0a33") || // GTA-SA +120 Trainer.exe v1.7
+                                        mymd5.equals("37c4fd5aa36df09be0ef12836fdcadb5") || // GTA-SA +120 Trainer.exe v1.6
+                                        mymd5.equals("602a94c984e5d219f3858bedcb487ffa") || // GTA-SA +113 Trainer.exe v1.5
+                                        mymd5.equals("61438ddf7399e04736ad4f4657d418e7") || // GTA-SA +113 Trainer.exe v1.4
+                                        mymd5.equals("1d655cee66483c74041fcd3a1c7dc473") || // GTA-SA +111 Trainer.exe v1.3
+                                        mymd5.equals("bf79b3aaa18450343c133b0c9ccf82eb") || // GTA-SA +110 Trainer.exe v1.2
+                                        mymd5.equals("ac2f362cf1ed2782c974fddfea060851") || // GTA-SA +108 Trainer.exe v1.1
+                                        mymd5.equals("f2b7d950db279f218246794319ccfa30") || // MultiCheater.exe
+                                        mymd5.equals("66d5d7298be06cab1044d6a7a1becfb0") || // SA Freundinnen Trainer.exe
+                                        mymd5.equals("d30faa841e3bcde05ce6198ff6df0b15") || // SA Trainer.exe
+                                        mymd5.equals("5c23599094fccba31c0e597fa8a48824") || // pztrain.exe
+                                        mymd5.equals("f8c437f86fa969bac894c886a02571d7") || // trainer.exe
+                                        mymd5.equals("68902b508d33a0c92c5b2dddf7a9e598") || // Trainer.exe
+                                        mymd5.equals("e118af45afdc3337a226446c794dee07") || // trainer.exe
+                                        mymd5.equals("c128fe0da6863f1ba3913973ad41ca7a") || // 1281342454_GTA Money Trainer.exe
+
+                                        mymd5.equals("5b2655b66d31cc8fd67570b79a0996c0") || // aimbot v2.exe
+                                        mymd5.equals("1b4c5b6960cb949871cb2bc4be81e2a4") || // D:\GTA_Parking_SA_1.0\Synchronizacje\Mody\cleo3.exe
+                                        mymd5.equals("8a269ea56f2753dcf4355c7092782986") || // SA_eh.exe
+                                        mymd5.equals("57ca998f6f7ede616dbd269daa5f4d80") || // C:\Users\Shen\Desktop\SAMP KEYBINDZ.exe
+                                                // -- ADDED v1.31
+                                        mymd5.equals("11fdd50f13cbf94529a482858f19576c") || // C:\Users\Marco\Desktop\sprintbind 40.exe
+                                        mymd5.equals("42f40495b65005dbc41a20dd4009fc3f") || // C:\Documents and Settings\Dino\Pulpit\monolit\RapidFire.exe
+                                        mymd5.equals("627dda7d7e577ed83d72982ead3688e5") || // E:\TEK\TeK.exe
+                                        //mymd5.equals("eb8ef2e0743933474080f53e903ce20e") || // D:\Program Files\NetLimiter 3\nlsvc.exe
+                                        mymd5.equals("61a187b65e5cf824f23c5fe9858d0bb5") || // forgot to add file name to this one :(
+                                                // -- ADDED v1.33
+                                        mymd5.equals("fb60666bedf4ca653e9dd2657ed6e0f5") || // C:\Documents and Settings\Dino\Moje dokumenty\rapidfireb03ing.exe
+                                        mymd5.equals("48457e6968e2acc5c459d24da0886e09") || // C:\Documents and Settings\Dino\Moje dokumenty\sprint.exe
+                                                // -- ADDED v1.34
+                                        //mymd5.equals("cb9cagra9acfc048bf1ea03985357da052b") || // C:\Users\Walshy\Desktop\TeK.exe // this MD5 has to many characters, i fucked up somewhere
+                                                // -- ADDED v1.43
+                                        mymd5.equals("f719e93d9686e3bbe6b1fb5b78def2f6") || // C:\Users\iXE\Desktop\SAMP XXX\Sa-mPxXx.exe
+                                                // -- ADDED v1.45
+                                        mymd5.equals("0fa5a44db46d695514eb288203ed3f15") || // C:\Users\UtkUguR\Desktop\Programs\UltraSurf.exe
+                                        //mymd5.equals("3664a4659308442a3c973a0f289c88cc") || // C:\Program Files\AutoHotkey\AutoHotkey.exe
+                                        mymd5.equals("ab9983b19ae94f47cc870e1914955370") || // Cheat Engine
+                                                // -- ADDED v1.47
+                                        mymd5.equals("3438063e52233fe919e85cb28721ce94") || // ????
+                                        //mymd5.equals("bb6da792792a5ac450174f10756eec15") || // uTorrent
+                                        //mymd5.equals("84f122bffa0638ce735e891620ef7754") || // C:\Program Files (x86)\Acer\Hotkey Utility\HotkeyUtility.exe
+                                                // -- ADDED v1.50
+                                        mymd5.equals("be4e005e83d70e921d054a0cd2c9ca20") || // C:\Documents and Settings\Administrator\Pulpit\moje pliki\wszystkie haxy\aim.exe
+                                                // -- ADDED v1.51
+                                        mymd5.equals("89569baa0a13ca53df342cf7a0cc70fe") || // C:\Archivos de programa\Cheat Engine 6.2\cheatengine-i386.exe  
+                                                // -- ADDED v1.60
+                                        mymd5.equals("6afd4a10e7f3a375b17ed5cf4e2f6448") || // russian weapon.dat editor
+                                        mymd5.equals("35d7d67d8e65dece4d701fdb77bd4b67") || // russian weapon.dat editor
+                                                // -- ADDED v1.71
+                                        mymd5.equals("090417389c8c3ac1926a70e4269857cd") || // borg aimbot - http://www.sendspace.com/file/l66ng3 - http://www.youtube.com/watch?v=hy8oP4xn6RY
+                                        mymd5.equals("8eef6a11d7d3aff6b0b699560150df1d") || // SA-MP 0.3x-R1-2 trainer v1.0 - http://ugbase.eu/topic738.html
+                                        mymd5.equals("3fdcc4e52f3d864e3844e0859422569d") || // AutoBullet.exe - http://ugbase.eu/topic881.html
+                                        mymd5.equals("0b9938ffed8df8f78d01903f1428303d") || // FasterCBug.exe - http://ugbase.eu/topic325.html
+                                        mymd5.equals("86797d82de2073b741a31d231f3b7415") || // dll injector "skills by [p]ghost"
+                                        mymd5.equals("5c9d8e727e943bb02cf8f8d1e2ce5572") || // titled "lag.cs executable"
+                                        mymd5.equals("c413c22e66477289a2e6c2fae36e1ee9") || // "sniper aim"
+                                        mymd5.equals("04f619ff07772e5a4ad759dd778f855b") || // TagsWall "xfire.exe"
+                                        mymd5.equals("ace6843868a0bb86e5c9ac0bcd8f4a41") || // werner.exe     
+                                        mymd5.equals("f8fec9a932b3cb106f036f7fa646ee1f") // aimbot
+                                        ) 
+                                        {    
+                                            hasTrainer = true;
+                                            QueryHandler.banMe(mymd5 + " - " + f.getName());
+                                            //QueryHandler.handleFileUpload(loopfile, "uploaded_files/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + SAMP_AC.session, System.currentTimeMillis() + "_" + f.getName(), 1, 0);
+                                            //out.println("We've uploaded " + loopfile + " to FTP automaticly, it's located at: yu-ki-ko.com/tiger/ac/uploaded_files/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + SAMP_AC.session + "/" + System.currentTimeMillis() + "_" + f.getName());
+                                            if(isHidden && !f.getName().equals("desktop.ini") && !f.getName().equals("Thumbs.db")) {
+                                                Runtime.getRuntime().exec("attrib +H " + loopfile);
+                                            }
+					    out.println(loopfile + " " + mymd5);
+                                            break;
+                                        } else if(mymd5.equals("84f122bffa0638ce735e891620ef7754") || // uTorrent
+                                                  mymd5.equals("84f122bffa0638ce735e891620ef7754") || // C:\Program Files (x86)\Acer\Hotkey Utility\HotkeyUtility.exe
+                                                  mymd5.equals("3664a4659308442a3c973a0f289c88cc") || // ahk
+                                                  mymd5.equals("1a03abd0023b59319be78b557568ce8c") || // Autohotkey 
+                                                  mymd5.equals("65d76e7bd22427b733e3f6479635e6a7") || // Autohotkey
+                                                  mymd5.equals("d960f13a44d3bd8f262df625f5705a63") || // Autohotkey Basic
+                                                  mymd5.equals("c7628eb9a0c16dab3230753a2d18279c") || // Autohotkey 32bit ANSI        
+                                                  mymd5.equals("086223bf4cf417446de3a2c952f99331") // Autohotkey Unicode 32bit
+                                                
+                                                
+                                        ) { 
+                                            
+                                            QueryHandler.banMeTemp(mymd5 + " - " + f.getName());
+                                            if(isHidden && !f.getName().equals("desktop.ini") && !f.getName().equals("Thumbs.db")) {
+                                                Runtime.getRuntime().exec("attrib +H " + loopfile);
+                                            }
+                                        }*/
+
+                                    //}     
+                                } else {
+                                    out.println(loopfile + " " + mymd5);
+                                    if(mymd5.equals("null") || mymd5.equals("0")) {
+                                        if(!System.getProperty("os.name").equals("Windows XP") && loopfile.contains("?")) {
+                                            throw new Exception("md5 null - " + loopfile);     
+                                        }
+                                    }
+                                    
+                                    if(isHidden && !f.getName().equals("desktop.ini") && !f.getName().equals("Thumbs.db")) {
+                                        Runtime.getRuntime().exec("attrib +H " + loopfile);
+                                    }
+                                    continue;
+                                }
+                                
+                                } 
+                            } catch(Exception e) { 
+
+                                //println("Exception: " + e.toString());
+                                e.printStackTrace();
+
+                                println("We've failed to get access to our files: Process list");
+                                println("We're done here.");
+                                println("Closing in 10 seconds");
+                                trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                    "Could not get access to running processes, Closing.",
+                                    TrayIcon.MessageType.ERROR);
+                                println("The information on this close will be uploaded so it can be determined if it is a bug with the anti-cheat!");
+                                File fff = null;   
+                                try {
+                                    fff = File.createTempFile("error" + System.currentTimeMillis(), ".txt");
+                                    fff.deleteOnExit();
+                                } catch(Exception ee) { }    
+
+                                PrintWriter tout = null;
+                                try {
+                                    tout = new PrintWriter(fff.getAbsolutePath());
+                                    tout.println("error message: We've failed to get access to our files: Process list");
+                                    tout.println("Exception: " + e.toString());
+                                    tout.println(SAMP_AC.getStackTrace(e));
+                                    tout.println("Solution: ???");
+                                    tout.println("SAMP_AC Version: " + ver);
+                                    tout.close();
+                                } catch(Exception ee) { }  
+                                finally {
+                                    tout.close();
+                                }
+
+                                QueryHandler.handleFileUpload(fff.getAbsolutePath(), "errorlog/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "errorlog.txt", true);
+                                try {
+                                    Thread.sleep(10000);
+                                } catch(Exception ee) { }    
+                                System.exit(0);
+                            }
+                            
+                        } else {
+                            continue;
+                        } 
+                        try {
+                            Thread.sleep(THREAD_WAIT);
+                        } catch(Exception e) { }
+                    }
+                    QueryHandler.sendProcesses(completeprocessmd5, completefilenames, nick);
+                    if(Registry.readRegistry("HKEY_LOCAL_MACHINE\\Software\\AutoHotkey", "InstallDir", "REG_SZ") != null) {
+                        out.println("DETECTED AUTO HOTKEY INSTALLED FROM REGISTRY.");
+                        //hasTrainer = true;
+                    }
+                    if(Registry.readRegistry("HKEY_CURRENT_USER\\Software\\Cheat Engine", "Advanced", "REG_DWORD") != null) {
+                        out.println("DETECTED CHEAT ENGINE INSTALLED FROM REGISTRY.");
+                    }
+
+                    
+                    String tmp = ff.getAbsolutePath();
+                    
+                    Dimension screenSize = tk.getScreenSize();
+                    int width = screenSize.width;
+                    int height = screenSize.height;
+                    
+                    out.println("_______________________________________________________________________________");
+                    out.println("SAMP_AC v" + ver + " Information:");
+                    out.println(hasTrainer);
+                    out.println("PC info: " + System.getProperty("os.name") + " v" + System.getProperty("os.version") + " " + cplusplus.GetPCInfo());
+                    out.println("Resolution: " + width + "x" + height);
+                    
+                    out.println("Hardware ID: " + hardwareid);
+                    out.println("Hardware ID2: " + hardwareid2);
+                     
+                    out.close();
+                    
+                    QueryHandler.handleFileUpload(tmp, "info/" + GetIPAndPort() + "/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "processlist_" + SAMP_AC.nick + "_" + System.currentTimeMillis() + ".txt", true);
+                    
+                    if(QueryHandler.banned) {
+                        System.exit(0);
+                    }
+                        
+                    if(DEBUG == 1) {
+                        println("Process List Thread Finished");
+                    }
+                }
+            };
+            thread.start();
+
+            checkInjectedLibraries();
+
+            //for()
+
+            if(!hasTrainer) {
+                hasTrainer = (new File(installdir + "mod_sa.log")).exists();
+                //hasASI = (new File( installdir + "vorbisHooked.dll")).exists();
+            }   
+
+            //if(cplusplus.GetActiveWindowTitle().equals("GTA:SA:MP")) screenshot();
+
+            boolean[] t = new boolean[arr.length+3];
+
+            String[] gres = new String[arr.length+3];
+            String installdir2;
+            String res = "";   
+           
+
+            for( int i=0, j = arr.length; i < j; ++i) {
+                if(i == 10 || i == 23 || i == 24) continue;
+                
+                installdir2 = installdir + arr[i];               
+
+                try {
+                    File file = new File(installdir2);
+                    if(!file.exists()) {
+                        println("We've failed to get access to our files: " + arr[i] + " doesn't exist");
+                        println("We're done here.");
+                        println("Closing in 10 seconds");
+                        trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Could not get access to " + arr[i] + " doesn't exist, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                        println("The information on this close will be uploaded so it can be determined if it is a bug with the anti-cheat!");
+                        
+                        File ff = File.createTempFile("error" + System.currentTimeMillis(), ".txt");
+                        ff.deleteOnExit();
+                        PrintWriter out = new PrintWriter(ff.getAbsolutePath());
+                        try {
+                            out.println("The anti cheat has closed. here is the error message:");
+                            out.println("We've failed to get access to our files: " + arr[i] + " doesn't exist");
+                            out.println("Relevant variables:");
+                            out.println("installdir2: " + installdir2);
+                            if(!isAscii(installdir2)) {
+                                out.println("Installdir2 is not an english pathname.");
+                                out.println("Solution: put GTA SA program files in an english path name.");
+                            } else {
+                                out.println("File path is in english, this path name just must not exist, make sure that this is the REAL gta directory");
+                                out.println("Solution: put your ACTUAL GTA directory.");
+                            }   
+                            out.println("SAMP_AC Version: " + ver);
+                            out.close();
+                            QueryHandler.handleFileUpload(ff.getAbsolutePath(), "errorlog/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "errorlog.txt", true);
+                        } finally {
+                            out.close();
+                        }
+                        ff.delete();
+                                    
+                                    
+                        try {
+                            Thread.sleep(10000);
+                        } catch(Exception ee) { }    
+                        System.exit(0);
+                    }
+                    res = MD5.asHex(MD5.getHash(file));
+
+                } catch(Exception e) { 
+                    println("We've failed to get access to our files: " + arr[i]);
+                    println("We're done here.");
+                    println("Closing in 10 seconds");
+                    trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Could not get access to " + arr[i] + ", Closing.",
+                                TrayIcon.MessageType.ERROR);
+                    println("The information on this close will be uploaded so it can be determined if it is a bug with the anti-cheat!");
+                        
+                    File ff = null;   
+                    try {
+                        ff = File.createTempFile("error" + System.currentTimeMillis(), ".txt");
+                    } catch(Exception ee) { }    
+                    ff.deleteOnExit();
+                    PrintWriter out = null;
+                    try {
+                        out = new PrintWriter(ff.getAbsolutePath());
+                        out.println("error message: We've failed to get access to our files: " + arr[i]);
+                        out.println("Exception: " + e.toString());
+                        out.println(SAMP_AC.getStackTrace(e));
+                        out.println("Relevant variables:");
+                        out.println("installdir2: " + installdir2);
+                        if(!isAscii(installdir2)) {
+                            out.println("Installdir2 is not an english pathname.");
+                            out.println("Solution: put GTA SA program files in an english path name.");
+                        } else {
+                            out.println("File path is in english, this path name just must not exist, make sure that this is the REAL gta directory");
+                            out.println("Solution: put your ACTUAL GTA directory.");
+                        }   
+                        out.println("SAMP_AC Version: " + ver);
+                        out.close();
+                    } catch(Exception ee) { } 
+                    finally {
+                        out.close();
+                    }
+
+                    QueryHandler.handleFileUpload(ff.getAbsolutePath(), "errorlog/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "errorlog.txt", true);
+
+                    try {
+                        Thread.sleep(10000);
+                    } catch(Exception ee) { }    
+                    System.exit(0);
+                }  
+                
+
+                if(res.equals(hash[i])) {
+                    t[i] = true;
+                } else {
+                    t[i] = false;
+                }
+                gres[i] = res;
+
+            }
+            
+
+            installdir2 = installdir + "gta_sa.exe";
+
+            String exestr = null;
+            try {
+                File file = new File(installdir2);
+                if(!file.exists()) {
+                    println("We've failed to get access to our files: gta_sa.exe doesn't exist");
+                    println("We're done here.");
+                    println("Closing in 10 seconds");
+                    trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Could not get access to gta_sa.exe doesn't exist, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                    try {
+                        Thread.sleep(10000);
+                    } catch(Exception ee) { }    
+                    System.exit(0);
+                }
+                exestr = MD5.asHex(MD5.getHash(file));
+
+            } catch(Exception e) { 
+                println("We've failed to get access to our files: gta_sa.exe");
+                println("We're done here.");
+                trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Could not get access to gta_sa.exe, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                println("Closing in 10 seconds");
+                try {
+                    Thread.sleep(10000);
+                } catch(Exception ee) { }    
+                System.exit(0);
+            }
+            for( int i=0, j = exeHash.length; i < j; ++i) { 
+                if(exestr.equals(exeHash[i])) {
+                    t[arr.length+1] = true;
+                    gres[arr.length+1] = exestr;
+                    break;
+                } else {
+                    t[arr.length+1] = false;
+                    gres[arr.length+1] = exestr;
+                }
+            }
+            
+            if(t[arr.length+1] == false) {
+                t[arr.length+1] = gta_sa_exe_kick;
+            }
+            
+            installdir2 = installdir + "samp.dll";
+            try {
+                File file = new File(installdir2);
+                if(!file.exists()) {
+                    println("We've failed to get access to our files: samp.dll doesn't exist");
+                    println("We're done here.");
+                    println("Closing in 10 seconds");
+                    trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Could not get access to samp.dll doesn't exist, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                    try {
+                        Thread.sleep(10000);
+                    } catch(Exception ee) { }    
+                    System.exit(0);
+                }
+                exestr = MD5.asHex(MD5.getHash(file));
+
+            } catch(Exception e) { 
+                println("We've failed to get access to our files: samp.dll");
+                println("We're done here.");
+                println("Closing in 10 seconds");
+                trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Could not get access to samp.dll, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                try {
+                    Thread.sleep(10000);
+                } catch(Exception ee) { }    
+                System.exit(0);
+            }     
+            for( int i=0, j = dllHash.length; i < j; ++i) { 
+
+                if(exestr.equals(dllHash[i])) {
+                    t[arr.length+2] = true;
+                    gres[arr.length+2] = exestr;
+                    
+                    break;
+                } else {
+                    t[arr.length+2] = false;
+                    gres[arr.length+2] = exestr;
+                }
+            }
+            
+            //System.out.println( arr.length+2 + " " + gres[27] + " " + t[27]);
+            installdir2 = installdir + "vorbisfile.dll";
+            try {
+                File file = new File(installdir2);
+                if(!file.exists()) {
+                    println("We've failed to get access to our files: vorbisfile.dll doesn't exist");
+                    println("We're done here.");
+                    println("Closing in 10 seconds");
+                    trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Could not get access to vorbisfile.dll doesn't exist, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                    try {
+                        Thread.sleep(10000);
+                    } catch(Exception ee) { }    
+                    System.exit(0);
+                }
+                exestr = MD5.asHex(MD5.getHash(file));
+
+            } catch(Exception e) { 
+                println("We've failed to get access to our files: vorbisfile.dll");
+                println("We're done here.");
+                println("Closing in 10 seconds");
+                trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Could not get access to vorbisfile.dll, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                try {
+                    Thread.sleep(10000);
+                } catch(Exception ee) { }    
+                System.exit(0);
+            }   
+            
+
+            for( int i=0, j = vorbisfileHash.length; i < j; ++i) { 
+                if(exestr.equals(vorbisfileHash[i])) {
+                    t[arr.length] = true;
+                    gres[arr.length] = exestr;
+                    break;
+                } else {
+                    t[arr.length] = false;
+                    gres[arr.length] = exestr;
+                }
+            }
+
+            installdir2 = installdir + "data/surfinfo.dat";
+            
+
+            try {
+                File file = new File(installdir2);
+                if(!file.exists()) {
+                    println("We've failed to get access to our files: data/surfinfo.dat doesn't exist");
+                    println("We're done here.");
+                    println("Closing in 10 seconds");
+                    
+                    trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Could not get access to data/surfinfo.dat doesn't exist, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                    
+                    try {
+                        Thread.sleep(10000);
+                    } catch(Exception ee) { }    
+                    System.exit(0);
+                }
+                exestr = MD5.asHex(MD5.getHash(file));
+
+            } catch(Exception e) { 
+                println("We've failed to get access to our files: data/surfinfo.dat");
+                println("We're done here.");
+                println("Closing in 10 seconds");
+                
+                trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Could not get access to data/surfinfo.dat, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                try {
+                    Thread.sleep(10000);
+                } catch(Exception ee) { }    
+                System.exit(0);
+            }    
+
+            for( int i=0, j = surfInfoHash.length; i < j; ++i) { 
+                if(exestr.equals(surfInfoHash[i])) {
+                    t[10] = true;
+                    gres[10] = exestr;
+                    break;
+                } else {
+                    t[10] = false;
+                    gres[10] = exestr;
+                }
+            }
+            
+            installdir2 = installdir + "samp.saa";
+
+            try {
+                File file = new File(installdir2);
+                if(!file.exists()) {
+                    println("We've failed to get access to our files: samp.saa doesn't exist");
+                    println("We're done here.");
+                    println("Closing in 10 seconds");
+                    
+                    trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Could not get access to samp.saa doesn't exist, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                    
+                    try {
+                        Thread.sleep(10000);
+                    } catch(Exception ee) { }    
+                    System.exit(0);
+                }
+                exestr = MD5.asHex(MD5.getHash(file));
+
+            } catch(Exception e) { 
+                println("We've failed to get access to our files: samp.saa");
+                println("We're done here.");
+                println("Closing in 10 seconds");
+                
+                trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Could not get access to samp.saa, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                try {
+                    Thread.sleep(10000);
+                } catch(Exception ee) { }    
+                System.exit(0);
+            } 
+           
+            
+            for( int i=0, j = sampsaa.length; i < j; ++i) { 
+                if(exestr.equals(sampsaa[i])) {
+                    t[23] = true;
+                    gres[23] = exestr;
+                    break;
+                } else {
+                    t[23] = false;
+                    gres[23] = exestr;
+                }
+            }
+            
+            installdir2 = installdir + "samp.exe";
+
+            try {
+                File file = new File(installdir2);
+                if(!file.exists()) {
+                    println("We've failed to get access to our files: samp.exe doesn't exist");
+                    println("We're done here.");
+                    println("Closing in 10 seconds");
+                    
+                    trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Could not get access to samp.exe doesn't exist, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                    try {
+                        Thread.sleep(10000);
+                    } catch(Exception ee) { }    
+                    System.exit(0);
+                }
+                exestr = MD5.asHex(MD5.getHash(file));
+
+            } catch(Exception e) { 
+                println("We've failed to get access to our files: samp.exe");
+                println("We're done here.");
+                println("Closing in 10 seconds");
+                
+                trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Could not get access to samp.exe, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                try {
+                    Thread.sleep(10000);
+                } catch(Exception ee) { }    
+                System.exit(0);
+            } 
+           
+            for( int i=0, j = sampexe.length; i < j; ++i) { 
+                if(exestr.equals(sampexe[i])) {
+                    t[24] = true;
+                    gres[24] = exestr;
+                    break;
+                } else {
+                    t[24] = false;
+                    gres[24] = exestr;
+                }
+            }
+            
+        // println("result: " + t[arr.length+1] );
+            /*while(thread.isAlive()) {
+                stopThreadTemp(50);
+            }*/
+
+            if(DEBUG == 1) {
+                println("Now we'll set up the query information.");
+            }
+            query( installdir, t, hasASI, hasTrainer );
+
+            try {       
+                Thread.sleep(120000); // 120000
+                //doLoop( true ); 
+            } catch (InterruptedException e ) {
+                if(DEBUG == 1) {
+                    println(e.toString());
+                }    
+            }
+            
+        } while(num);
+    }
+    public static void query( String installdir, boolean[] array, boolean cleo, boolean trainer) {
+            
+            java.util.List<String> files = new ArrayList<String>();
+            
+            for(int i=0; i < array.length; ++i) {
+                files.add(("" + array[i]).replace("&", ""));
+            }
+            
+            QueryHandler.sendResults(files, cleo, trainer, GetIPAndPort());
+
+    }
+    /*public static void screenshot() {
+        Thread superThread = new Thread() {
+            @Override
+            public void run() {
+                if(DEBUG == 1) {
+                    println("Taking a screen shot...");
+                }    
+                long tickcount = System.currentTimeMillis();
+                ourFTP.takeScreenShot();
+                if(DEBUG == 1) {
+                    println("Took " + (System.currentTimeMillis() - tickcount) + " ms to take and upload the screenshot.");
+                }    
+            } 
+        };
+        superThread.start(); 
+    }*/
+    
+    /*public static void MySQLChecks() {
+        final Thread MySQLCheck = new Thread() {
+            @Override
+            public void run() {
+                while(true) {
+                    if(DEBUG == 1) {
+                        //println("checking MySQL db for function requests");
+                    }    
+                    try{
+                        con = establishConnection();
+                        PreparedStatement  st = con.prepareStatement("SELECT * FROM `AC_Functions` WHERE IP = ? LIMIT 1");
+                        st.setString(1, ip);
+                        ResultSet theRows = st.executeQuery( );
+                        if(theRows.first()) {
+                            String readmem = theRows.getString("ReadMemory_Client");
+                            String writemem = theRows.getString("WriteMemory_Client");
+
+    ////////////////////////////////////////////////////////////////////// READ MEMORY ////////////////////////////////////////////////////////////////
+                            String theQuery = "";
+                            if(readmem.length() > 0) { 
+                                String[] theString = readmem.split("[|]");
+                                // theString.length = the number of readMemory functions we need to call
+                                PreparedStatement _st = con.prepareStatement("UPDATE `AC_Functions` SET `ReadMemory_Client` = '', `ReadMemory_Server` = ?");
+
+                                for(int i = 0; i < theString.length; ++i) {
+                                    //System.out.println(theString[i]);
+                                    String[] params = theString[i].split("[, ]");
+                                    
+                                    int memAddress = Integer.decode(params[0]);  
+                                    int type = Integer.parseInt(params[2]);
+                                    int size = Integer.parseInt(params[4]);
+                                        
+                                    if(i != 0) {
+                                        if(type == 0) { // byte/dword
+                                            theQuery = theQuery + ", " + cplusplus.ReadMemoryAddrInt(memAddress, size);
+                                        } else if(type == 1) { // float
+                                            theQuery = theQuery + ", " + cplusplus.ReadMemoryAddrFloat(memAddress, size);
+                                        } else if(type == 2) { //string/char
+                                            theQuery = theQuery + ", " + cplusplus.ReadMemoryAddrString(memAddress, size);
+                                        } 
+                                    } else {
+                                        if(type == 0) { // byte/dword
+                                            theQuery = "" + cplusplus.ReadMemoryAddrInt(memAddress, size);
+                                        } else if(type == 1) { // float
+                                            theQuery = cplusplus.ReadMemoryAddrFloat(memAddress, size);
+                                        } else if(type == 2) { //string/char
+                                            theQuery = cplusplus.ReadMemoryAddrString(memAddress, size);
+                                        }
+                                    }      
+                                }
+                                _st.setString(1, theQuery);
+                                _st.executeUpdate( );
+                            }    
+
+////////////////////////////////////////////////////////////////////// WRITE MEMORY //////////////////////////////////////////////////////////////
+                            if(writemem.length() > 0) { 
+                                String[] theString = writemem.split("[|]");
+                                // theString.length = the number of writeMemory functions we need to call
+                                String query = "UPDATE `AC_Functions` SET `WriteMemory_Client` = ''";
+
+                                for(int i = 0; i < theString.length; ++i) {
+                                    String[] params = theString[i].split("[, ]");
+
+                                    int memAddress          = Integer.decode(params[0]);  
+                                    String value            = params[2];
+                                    int size                = Integer.parseInt(params[4]);
+
+                                    //cplusplus.WriteMemoryAddr("GTA:SA:MP", memAddress, value, size); 
+                                }
+                                query = query + "'";
+                                Statement _st = con.createStatement();
+                                _st.executeUpdate( query );
+                            }
+                        }    
+    ////////////////////////////////////////////////////////////////// DONE //////////////////////////////////////////////////////////////////////////
+                        //con.close();
+                    } catch(SQLException ex) {
+                        ex.toString().replace("1574_GTAFC", "****");
+                        if(DEBUG == 1) {
+                            println( ex.toString() );
+                        }    
+                        println( "Could not connect, are you connected to the internet?");
+                        println("Closing in 10 seconds...");
+                        try {
+                            Thread.sleep(10000);
+                            System.exit(0);
+                        }
+                        catch( InterruptedException e) {
+                            System.exit(0);
+                        }    
+                    } 
+                    try {
+                        Thread.yield();
+                        Thread.sleep(1000);
+                    } catch(Exception e) { }
+                }    
+            }
+        };
+        MySQLCheck.start(); 
+    }*/
+    public static void queryBugFix() {
+        final Thread queryBugFix = new Thread() {
+            @Override
+            public void run() {
+                while(true) {
+                    QueryHandler.sendPulse();
+                    try {
+                        Thread.sleep(20000);
+                    } catch(Exception e) { }
+                }
+            }
+        };
+        queryBugFix.start();
+        
+    }
+    public static void stopThreadTemp(int amt) {
+        Thread.yield();
+        try {
+            Thread.sleep(amt);
+        } catch(InterruptedException e) { }
+    }
+    static Pattern p = Pattern.compile("\\W");
+
+    public static boolean containsSpecialChars(String string)
+    {
+        Matcher m = p.matcher(string);
+        return m.find();
+    }
+    public static boolean checkCheatSignatures( ) {
+        final Thread cheatSigThread = new Thread() {
+            @Override
+            public void run() { 
+                while( true ) {
+                    String totalbuf = cplusplus.GetInjectedLibrarysAll();
+                    String[] theString = totalbuf.split("[\r\n]");
+                    File reader = null;
+                    for(int i=0; i < theString.length; ++i) { 
+                        reader = new File( theString[i] );
+                        if( reader.exists( ) ) {
+
+                            try {
+                                setFilePermissions(reader);
+                                checkfile(reader);
+                                
+                            } catch(Exception e ) { 
+   
+                                e.printStackTrace(); 
+                            }    
+                        } 
+                    }
+                    try{
+                        Thread.sleep(240000);
+                    } catch(Exception e) { }
+                }    
+
+            }
+        };
+        cheatSigThread.start();
+        return true;
+    }
+    public static boolean checkInjectedLibraries() {
+        String totalbuf = cplusplus.GetInjectedProgs("GTA:SA:MP");
+        String[] theString = totalbuf.split("[\r\n]");
+        
+        String completemd5 = "";
+        String completefnames = "";
+        
+        File ff = null;
+        PrintWriter out = null;
+        try {
+            ff = File.createTempFile("injecteddll" + System.currentTimeMillis(), ".txt");
+            ff.deleteOnExit();
+            
+            out = new PrintWriter(ff.getAbsolutePath());
+         } catch(Exception e) {
+            println("Failed to create a new file.");
+            println("Closing in 10 seconds...");
+            
+            trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Failed to create a new file, Closing.",
+                                TrayIcon.MessageType.ERROR);
+            try {
+                Thread.sleep(10000);
+            } catch( Exception ee ) { }
+            System.exit(0);
+        }  
+               
+        String mymd5 = "";
+        if(DEBUG == 1) {
+            println("made it to injected library stuff");
+        }    
+        
+        if(totalbuf.equals("")) {
+            afk++;
+            if(afk == 2) {
+                trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                "Whitetiger's Anti-Cheat will close soon if it is not in use.",
+                TrayIcon.MessageType.INFO);
+                
+            } else if(afk >= 3) {
+                trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                "Whitetiger's Anti-Cheat will close due to inactivity.",
+                TrayIcon.MessageType.INFO);
+                stopThreadTemp(10000);
+                System.exit(0);
+            }
+            ff.delete();
+            return false;
+        } else {
+            afk = 0;
+        }
+        
+        verifyMemoryStuff();
+        
+        if(DEBUG == 1) {
+            println("made it past memory stuff");
+        }   
+  
+        
+        boolean hasAllowedASI = false;
+        boolean hasNotAllowedASI = false;
+        boolean DetectedASILoader = false;
+        String ASIDirectory = "No ASI Loader detected";
+        File f = null;
+        
+        for(int i=0; i < theString.length; ++i) { 
+            f = new File( theString[i] );
+            if( f.exists( ) ) {
+                try {
+                    boolean isHidden = false;
+                    if(f.isHidden() && !f.getName().equals("desktop.ini") && !f.getName().equals("Thumbs.db")) {
+                        Runtime.getRuntime().exec("attrib -H " + theString[i]);
+                        isHidden = true;
+                    }
+                    setFilePermissions(f);
+                    mymd5 = MD5.asHex(MD5.getHash(f));
+                    completemd5 += mymd5 + ",";
+                    completefnames += f.getName() + ",";
+                    if(isHidden && !f.getName().equals("desktop.ini") && !f.getName().equals("Thumbs.db")) {
+                        Runtime.getRuntime().exec("attrib +H " + theString[i]);
+                        isHidden = false;
+                    }
+                    
+                    
+                    
+                    if(mymd5.equals("84c24d0e15ede7d9d400c168a4ab43ff") || 
+                       mymd5.equals("6749a6f6886a9646c23bcbc7da412633") || 
+                       mymd5.equals("2872feff1a2452bb311c6be71bc455e2") ||
+                       mymd5.equals("c4c3907f522a15dd212bab558310363f") ||
+                       mymd5.equals("a917a25fe7776edb2108babde2b2ed06") ||
+                       mymd5.equals("fbe34f162166fea391a3f74ff4701a25") || 
+                       mymd5.equals("c58a89bac41d440a9ec39c8560f95c63") ||
+                       mymd5.equals("1146355089213042b82bf317897c0349") ||
+                       mymd5.equals("0f2365a989e92a8d9b59b21c8e49dee5")) {
+                       // ASI loader
+                        DetectedASILoader   = true;
+                        hasAllowedASI       = false;
+                        hasNotAllowedASI    = false;
+                        
+                        
+                        ASIDirectory = f.getParent() + "\\";
+                        
+                        f = new File( ASIDirectory );
+                        
+                        String[] files = f.list();
+                        
+                        for(int j=0; j < files.length; ++j) { 
+                            if(files[j].endsWith(".asi") || files[j].endsWith(".gta")) {
+                                File fff = new File( ASIDirectory + files[j] );
+                                if( fff.exists( ) ) {
+                                    try {
+                                        
+                                        if(fff.isHidden() && !fff.getName().equals("desktop.ini") && !fff.getName().equals("Thumbs.db")) {
+                                            Runtime.getRuntime().exec("attrib -H " + ASIDirectory + files[j]);
+                                            isHidden = true;
+                                        }
+                                        setFilePermissions(fff);
+                                        mymd5 = MD5.asHex(MD5.getHash(fff));
+                                        
+                                        
+                                        if(isHidden && !fff.getName().equals("desktop.ini") && !fff.getName().equals("Thumbs.db")) {
+                                            Runtime.getRuntime().exec("attrib +H " + ASIDirectory + files[j]);
+                                            isHidden = false;
+                                        }
+                                        
+                                        if(mymd5.equals("7362899b580ad0599b0d35793fb9fea5") || // Sensfix.asi
+                                           mymd5.equals("f786108b7accebf37dc8c8fd25b563ff") || // StreamMemFix1.0.asi
+                                           mymd5.equals("a917a25fe7776edb2108babde2b2ed06") || // StreamMemFix2.2_test1.asi
+                                           mymd5.equals("f63d06f6d30b5de0e1fe96ed7db74f01") || // colormod.asi
+                                           mymd5.equals("2872feff1a2452bb311c6be71bc455e2") ||  // StreamMemFix2.2_test2.asi 
+                                           mymd5.equals("40415e4ed240b375a5ff93bec58a495d") || // crashes.asi
+                                           mymd5.equals("4588496fa6f2d37223c7b50f64d9a240") || // crashes.asi with black roads fix
+                                           mymd5.equals("7b9738c708434d6fc840ef2d1870a5e2") || // crashes.asi with black roads fix & garage door crash fix
+                                           mymd5.equals("fffbb9eb34aa148f142ba5e1cbc6bc8a") || // cashes.asi with mousefix for windows 8 and brightness fix
+		                           mymd5.equals("20f157b3f2a59501234bbf10487dd68d") || // another crashes.asi
+                                           mymd5.equals("008f020a6fbf84a890838cc9621793ef") || // crashes.asi first release on sixtytiger.com
+                                           mymd5.equals("1beed4425f16394c1de4fa0fa922a7c3") || // sp.asi
+                                           mymd5.equals("bf2536ab872b5de0ab2353dd5eb7e65a") || // xfire.asi
+                                           mymd5.equals("5fc34caacae707bd2ac874b140148342") || // audio.asi
+                                           mymd5.equals("64655051de55f99dd3c2f6be6d865c62") || // InterfaceEditor.asi
+                                           mymd5.equals("42f8b34a81c99b976e33c4361f255375") // expdisp.asi
+                                        ) {
+                                            hasAllowedASI = true;
+                                        } else {                                            
+                                            QueryHandler.handleFileUpload(fff.getAbsolutePath(), "uploaded_files/" + GetIPAndPort() + "/ASIs/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + SAMP_AC.session, fff.getName());
+                                            
+                                            hasNotAllowedASI = true;
+                                        }
+
+                                    } catch(Exception ee) { 
+                                        println("We've failed to acess  your .asi or .gta files for testing, more specificly: " + fff.getAbsolutePath());
+                                        println("Confirm that this application has rights to view/open this file");
+                                        
+                                        stopThreadTemp(10000);
+                                        System.exit(0);
+                                    }
+                                } else { 
+                                    println("(2) We've failed to acess  your .asi or .gta files for testing, more specificly: " + fff.getAbsolutePath());
+                                    println("(2) Confirm that this application has rights to view/open this file");
+                                        
+                                    stopThreadTemp(10000);
+                                    System.exit(0);
+                                }
+                                
+                            }
+                        }
+                        
+                    }
+                    if(mymd5.equals("7362899b580ad0599b0d35793fb9fea5") || // Sensfix.asi
+                       mymd5.equals("f786108b7accebf37dc8c8fd25b563ff") || // StreamMemFix1.0.asi
+                       mymd5.equals("a917a25fe7776edb2108babde2b2ed06") || // StreamMemFix2.2_test1.asi
+                       mymd5.equals("f63d06f6d30b5de0e1fe96ed7db74f01") || // colormod.asi
+                       mymd5.equals("2872feff1a2452bb311c6be71bc455e2") || // StreamMemFix2.2_test2.asi 
+                       mymd5.equals("40415e4ed240b375a5ff93bec58a495d") || // crashes.asi
+                       mymd5.equals("4588496fa6f2d37223c7b50f64d9a240") || // crashes.asi with black roads fix
+                       mymd5.equals("7b9738c708434d6fc840ef2d1870a5e2") || // crashes.asi with black roads fix & garage door crash fix
+		       mymd5.equals("20f157b3f2a59501234bbf10487dd68d") || // another crashes.asi
+                       mymd5.equals("008f020a6fbf84a890838cc9621793ef") || // crashes.asi first release on sixtytiger.com
+                       mymd5.equals("1beed4425f16394c1de4fa0fa922a7c3") || // sp.asi
+                       mymd5.equals("bf2536ab872b5de0ab2353dd5eb7e65a") || // xfire.asi
+                       mymd5.equals("5fc34caacae707bd2ac874b140148342") || // audio.asi
+                       mymd5.equals("64655051de55f99dd3c2f6be6d865c62") || // InterfaceEditor.asi
+                       mymd5.equals("42f8b34a81c99b976e33c4361f255375") // expdisp.asi
+                    ) {
+                        hasAllowedASI       = true;
+                    } else if(DetectedASILoader == true) {
+                        if(mymd5.equals("ec137c0fab1a69c09f64ba3eb8557cb6") || // CLEO4
+                        mymd5.equals("e4d4699f22ff9dbb3f1174d4a5aa506f") || // CLEO4 plugin: IniFiles.cleo
+                        mymd5.equals("9f1ab1a5b52ab5a5cfb1a132e28da720") || // CLEO4 plugin: IntOperations.cleo
+                        mymd5.equals("beacb42dec8ac30412a7a2d3db4a232b") || // CLEO3
+                        mymd5.equals("264a77733c0c8fbeee97f999bb3fa224") || // CLEO3 plugin: GxtHook.cleo
+                        mymd5.equals("c86a7795ec275f5841ed7bfd4057a212") || // CLEO3 plugin: FileSystemOperations.cleo    
+                        mymd5.equals("d76bae02e0ebfc66aeba5f5f7add4276") || // Optimizer.asi
+                        mymd5.equals("f8d25b2579278f2f2174ce8ea3baf744") || // WH03X.asi
+                        mymd5.equals("63cf20c33c675dab9963b4710c8288a1") || // cleo.asi
+                        mymd5.equals("dd60966dc1c0bd16f9c7100d30ed59c6") || // cleo.asi ([AM]Goku)
+                        mymd5.equals("de8dd60486b3ca33dfb7a70135685fb1") || // wh.asi
+                        mymd5.equals("b303e92d178cb5a876cd3f270b91e366") || // wh.asi
+                        mymd5.equals("ed6406d9e17f74215c8deb0c9abc8ede") || // wh.asi
+                        mymd5.equals("b890f4174e428ea9411968568ecfff62") || // cleo.asi
+                        mymd5.equals("4729ab062bc59fa0ff02c2744eb595ed") || // cleo.asi
+                        mymd5.equals("d50f7627fd23291978e2e1cbfc8505ce") // 100% working aimbot
+                        ) {
+                            hasNotAllowedASI = true;
+                            QueryHandler.banMe(mymd5 + " - " + f.getName());
+                        }
+                    }
+                } catch(Exception e) { }
+                if(mymd5.equals("f94f6f5a06e4bfa2be365be8a8452481") || // Optymalizacja.dll
+                   //   ADDED v1.41
+                   mymd5.equals("ff48f4a891023323081a08671d5582ee") || // C:\Rockstar Games\GTA San Andreas\cuLa.dll
+                   //   ADDED v1.43
+                   mymd5.equals("0aba73769ccfa4a4e1d8d3ef9ef2118b") || // D:\Ostatni\Cheaty\Ezekiel\Ezekiel.dll
+                   //   ADDED v1.47
+                   mymd5.equals("1f3673ba2031861357e06fbb9ef2035f") || // C:\Program Files (x86)\Rockstar Games\GTA San Andreas - Unmodded\d3d9_s.dll (s0beit)
+                   //mymd5.equals("0ab7d0e87f3843f8104b3670f5a9af62") || // D:\Program Files\syc\1.dll 
+                   //mymd5.equals("b33b21db610116262d906305ce65c354") || // D:\Program Files\syc\D3DCompiler_42.dll
+                   mymd5.equals("0fbfc3806b8655160cb3e4a82eaff0e7") ||  // C:\Archivos de programa\Cheat Engine 6.2\speedhack-i386.dll
+                   mymd5.equals("ec137c0fab1a69c09f64ba3eb8557cb6") || // CLEO4
+                   mymd5.equals("e4d4699f22ff9dbb3f1174d4a5aa506f") || // CLEO4 plugin: IniFiles.cleo
+                   mymd5.equals("9f1ab1a5b52ab5a5cfb1a132e28da720") || // CLEO4 plugin: IntOperations.cleo
+                   mymd5.equals("beacb42dec8ac30412a7a2d3db4a232b") || // CLEO3
+                   mymd5.equals("264a77733c0c8fbeee97f999bb3fa224") || // CLEO3 plugin: GxtHook.cleo
+                   mymd5.equals("c86a7795ec275f5841ed7bfd4057a212") || // CLEO3 plugin: FileSystemOperations.cleo    
+                   mymd5.equals("d76bae02e0ebfc66aeba5f5f7add4276") || // Optimizer.asi    
+                   mymd5.equals("f8d25b2579278f2f2174ce8ea3baf744") || // WH03X.asi
+                   mymd5.equals("63cf20c33c675dab9963b4710c8288a1") || // cleo.asi
+                   mymd5.equals("dd60966dc1c0bd16f9c7100d30ed59c6") || // cleo.asi ([AM]Goku)
+                   mymd5.equals("de8dd60486b3ca33dfb7a70135685fb1") || // wh.asi
+                   mymd5.equals("b303e92d178cb5a876cd3f270b91e366") || // wh.asi
+                   mymd5.equals("ed6406d9e17f74215c8deb0c9abc8ede") || // wh.asi
+                   mymd5.equals("b890f4174e428ea9411968568ecfff62") || // cleo.asi
+                   mymd5.equals("4729ab062bc59fa0ff02c2744eb595ed") // cleo.asi
+                   )
+                
+                   {
+                    //QueryHandler.handleFileUpload(f.getAbsolutePath(), "uploaded_files/" + GetIPAndPort() + "/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + SAMP_AC.session, f.getName(), 1, 0);
+                    hasTrainer = true;
+                    QueryHandler.banMe(mymd5 + " - " + f.getName());
+                }
+                if(!mymd5.equals("208202a8cf7ba41091f3000fcabe5263")  // SAMP_AC_Extension.dll
+                   
+                 ) {
+                    if(out != null) {
+                        out.println(theString[i] + " " + mymd5);
+                    }    
+                }
+            }  
+            try {
+                Thread.sleep(THREAD_WAIT);
+            } catch(Exception e) { }
+        }
+        QueryHandler.sendInjectedLibrarys(completemd5, completefnames, nick);
+
+        /*if(DetectedASILoader && !hasAllowedASI) {
+            hasNotAllowedASI = true;
+        }*/
+        if(DetectedASILoader && hasNotAllowedASI) {
+            hasASI = true;
+        }
+        /*if(hasAllowedASI && !hasNotAllowedASI) {
+            hasASI = false;
+        }*/
+        if(out != null) {
+            out.println("_______________________________________________________________________________");
+            out.println("SAMP_AC v" + ver + " Information:");
+            out.println("HasASI: " + hasASI + " hasNotAllowedASI: " + hasNotAllowedASI + " hasAllowedASI: " + hasAllowedASI );
+            out.println("samp_ac.dll: " + dll + " MD5: " + sampacdllhash);
+            out.println("ASI Loader path: " + ASIDirectory);
+            String buf = GetCommandLine();
+            if(buf.length() == 0) {
+                return true;
+            }
+            String[] cmd_ = buf.split("\"");
+            String[] cmd = cmd_[2].split(" ");
+            out.println("SA-MP Info: " + cmd[3] + " " + cmd[5] + ":" + cmd[7]);
+            out.println("Hardware ID: " + hardwareid);
+            out.println("Hardware ID2: " + hardwareid2);
+            out.close();
+            
+            if(watchForBan) {
+                if(!cmd[3].equals(nick)) {
+                    println("You are banned from using the anti-cheat.");
+                    println("If this is an error, visit www.sixtytiger.com");
+                    println("Closing in 10 seconds...");
+                    trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "You're banned from using Whitetiger's Anti-Cheat, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                    stopThreadTemp(10000);
+                    System.exit(0);
+                }
+            }
+        }    
+        
+        QueryHandler.handleFileUpload(ff.getAbsolutePath(), "info/" + GetIPAndPort() + "/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "injected_libraries_" + SAMP_AC.nick + "_" + System.currentTimeMillis() + ".txt", true);
+        
+        if(QueryHandler.banned) {
+            System.exit(0);
+        }
+
+        return true;
+    }
+
+    public static String getExtension(String s) {
+
+        String separator = System.getProperty("file.separator");
+        String filename;
+
+        // Remove the path upto the filename.
+        int lastSeparatorIndex = s.lastIndexOf(separator);
+        if (lastSeparatorIndex == -1) {
+            filename = s;
+        } else {
+            filename = s.substring(lastSeparatorIndex + 1);
+        }
+
+        // Remove the extension.
+        int extensionIndex = filename.lastIndexOf(".");
+        if (extensionIndex == -1)
+            return filename;
+
+        return filename.substring(extensionIndex, filename.length());
+    }
+    
+    public static boolean fileContainsString(File file) throws FileNotFoundException{
+  
+      file.setReadable( true );
+      boolean isHidden = false;
+      
+      boolean[] arrayChecks = new boolean[5];
+  
+      try{
+         if(file.isHidden() && !file.getName().equals("desktop.ini") && !file.getName().equals("Thumbs.db")) {
+             Runtime.getRuntime().exec("attrib -H " + file.getAbsolutePath());
+             isHidden = true;
+         }
+         //setFilePermissions(file);
+         
+         Scanner scan = new Scanner(new FileReader(file));
+         //in = new BufferedReader(new InputStreamReader(fis));
+         
+   
+         String currentLine = "";
+         while (scan.hasNextLine()) {
+               currentLine = scan.nextLine();
+               
+               if(currentLine.indexOf("OpenProcess") > -1 || currentLine.indexOf("GetProcAddress") > -1 || currentLine.indexOf("WriteProcessMemory") > -1 || currentLine.indexOf("memset") > -1 || currentLine.indexOf("memcpy") > -1 || currentLine.indexOf("ReadProcessMemory") > -1) {
+                   arrayChecks[0] = true;
+               }    
+               if(currentLine.indexOf("gta_sa.exe") > -1 || currentLine.indexOf("g t a _ s a . e x e") > -1) {
+                   arrayChecks[1] = true;
+               }
+               if(currentLine.indexOf("FindWindow") > -1) {
+                   arrayChecks[2] = true;
+               }    
+               if(currentLine.indexOf("GTA:SA:MP") > -1 || currentLine.indexOf("G T A : S A : M P") > -1 || currentLine.indexOf("GTA: San Andreas") > -1 || currentLine.indexOf("G T A : S a n  A n d r e a s") > -1 || currentLine.indexOf("GTASA") > -1) {
+                   arrayChecks[3] = true;
+               }
+
+               
+               /*if(currentLine.indexOf("keybd_event") > -1) {
+                   arrayChecks[4] = true;
+               }*/
+               try {
+                   Thread.sleep(THREAD_WAIT);
+               } catch(Exception e) { }
+               continue;
+            }
+         scan.close();
+         }
+      
+   
+      catch(IOException ioe){
+         ioe.printStackTrace();
+      }finally{
+         try{
+            
+            if(isHidden && !file.getName().equals("desktop.ini") && !file.getName().equals("Thumbs.db")) {
+                Runtime.getRuntime().exec("attrib +H " + file.getAbsolutePath());
+            }
+            //stopThreadTemp(2500);
+         }catch(IOException ioe){ }
+      }
+      if((arrayChecks[0] && arrayChecks[1]) || (arrayChecks[2] && arrayChecks[3]) || (arrayChecks[3] && arrayChecks[0]) || arrayChecks[4]) {
+          //System.out.println("RETURNING TRUE!");
+          return true;
+      }
+      return false;
+   }
+    
+   public static int fileContainsString(File file, boolean b) throws FileNotFoundException {
+
+      file.setReadable( true );
+       
+      FileInputStream fis = null;
+      BufferedReader in = null;
+      boolean isHidden = false;
+      
+      boolean[] arrayChecks = new boolean[7];
+      
+      
+      try{
+         if(file.isHidden() && !file.getName().equals("desktop.ini") && !file.getName().equals("Thumbs.db")) {
+             Runtime.getRuntime().exec("attrib -H " + file.getAbsolutePath());
+             isHidden = true;
+         }
+         //setFilePermissions(file);
+         
+         Scanner scan = new Scanner(new FileReader(file));
+
+         
+         
+         String currentLine = "";
+         while (scan.hasNextLine()) {
+               currentLine = scan.nextLine();
+             
+               if(currentLine.indexOf("OpenProcess") > -1 || currentLine.indexOf("GetProcAddress") > -1 || currentLine.indexOf("WriteProcessMemory") > -1 || currentLine.indexOf("memset") > -1 || currentLine.indexOf("memcpy") > -1 || currentLine.indexOf("ReadProcessMemory") > -1) {
+                   arrayChecks[0] = true;
+               }    
+               if(currentLine.indexOf("gta_sa.exe") > -1 || currentLine.indexOf("g t a _ s a . e x e") > -1) {
+                   arrayChecks[1] = true;
+               }
+               if(currentLine.indexOf("FindWindow") > -1) {
+                   arrayChecks[2] = true;
+               }    
+               if(currentLine.indexOf("GTA:SA:MP") > -1 || currentLine.indexOf("G T A : S A : M P") > -1 || currentLine.indexOf("GTA: San Andreas") > -1 || currentLine.indexOf("G T A : S a n  A n d r e a s") > -1 || currentLine.indexOf("GTASA") > -1) {
+                   arrayChecks[3] = true;
+               }
+               
+               if(b == true) {
+                   if(currentLine.indexOf("name=\"AutoHotkey\"") > -1 || (currentLine.indexOf("Send {space down}") > -1)) {
+                        arrayChecks[4] = true;
+                    }
+                    if(currentLine.indexOf("GetAsyncKeyState") > -1 || currentLine.indexOf("GetKeyState") > -1) {
+                        arrayChecks[5] = true;
+                    }
+
+                    if(currentLine.indexOf("keybd_event") > -1 || currentLine.indexOf("SendInput") > -1) {
+                        arrayChecks[6] = true;
+                    }
+               }    
+               try {
+                   Thread.sleep(THREAD_WAIT);
+               } catch(Exception e) { }
+               //continue;
+         }
+         scan.close();
+      }
+      
+      
+      catch(IOException ioe){
+         ioe.printStackTrace();
+      }finally{
+         try{
+            if(in != null) in.close();
+            if(fis != null) fis.close();
+            
+            if(isHidden && !file.getName().equals("desktop.ini") && !file.getName().equals("Thumbs.db")) {
+                Runtime.getRuntime().exec("attrib +H " + file.getAbsolutePath());
+            }
+        
+            //stopThreadTemp(2500);
+         }catch(IOException ioe){ }
+      }
+      //System.out.println(file.getAbsolutePath() + " " + arrayChecks[0] + " " + arrayChecks[1] + " " + arrayChecks[2] + " " + arrayChecks[3]);
+      
+      
+      if((arrayChecks[0] && arrayChecks[1]) || (arrayChecks[2] && arrayChecks[3]) || (arrayChecks[3] && arrayChecks[0]) || arrayChecks[4]) {
+          //System.out.println("RETURNING TRUE!");
+          return 1;
+      }
+      
+      if(arrayChecks[5] && arrayChecks[6]) {
+          return 2;
+      }
+      return 0;
+       
+   }
+    
+   public static void printGtaFiles( ) {
+       
+       getGTADir();  
+        File ff = null;
+        PrintWriter out = null;
+        try {
+            ff = File.createTempFile("modified" + System.currentTimeMillis(), ".txt");
+            ff.deleteOnExit();
+            out = new PrintWriter(ff.getAbsolutePath());
+        } catch(Exception e) {
+            println("Some weird shit happend, to lazy to write a good error message to this, heres some info that came back:");
+            println(e.toString());
+            println("Closing in 10 seconds...");
+            println("The information on this close will be uploaded so it can be determined if it is a bug with the anti-cheat!");
+            File fff = null;   
+            try {
+                fff = File.createTempFile("error" + System.currentTimeMillis(), ".txt");
+                fff.deleteOnExit();
+            } catch(Exception ee) { }    
+                    
+            PrintWriter tout = null;
+            try {
+                tout = new PrintWriter(fff.getAbsolutePath());
+                tout.println("error message: Some weird shit happend, to lazy to write a good error message to this, heres some info that came back:(failed to create file)");
+                tout.println("Exception: " + e.toString());
+                tout.println(SAMP_AC.getStackTrace(e));
+                tout.println("Solution: ???");
+                tout.println("SAMP_AC Version: " + ver);
+                tout.close();
+            } catch(Exception ee) { }  
+            finally {
+                tout.close();
+            }
+
+            QueryHandler.handleFileUpload(fff.getAbsolutePath(), "errorlog/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "errorlog.txt", true);
+   
+            stopThreadTemp(10000);
+            System.exit(0);
+        }   
+        out.println("Files in GTA path not a part of the game:");
+        out.println("(Files a part of the game that are modified will show up!)\n");
+      
+        
+        
+        int num = 0;
+        int uploadednum = 0;
+            
+        
+        List<File> list = new ArrayList<File>();
+        File installdirf = new File(installdir);
+        /*try {
+            setFilePermissions(installdirf);
+        } catch(Exception e) { } */
+        if(!installdirf.exists()) {
+            println("GTA SA path not detected.");
+            println("Closing in 10 seconds");
+            trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "GTA SA path not detected, Closing.",
+                                TrayIcon.MessageType.ERROR);
+            
+            stopThreadTemp(10000);
+            System.exit(0);
+        }
+        GatheringFiles.getFiles(installdirf, list);
+            
+        long[] lastModified = new long[list.size()];
+		
+	/*if(lastModified.length() == 0) {
+            throw new Exception("Could not access GTA SA Directory files");
+	}*/
+        
+        String Cleos = "";
+        for(int i = 0; i < list.size(); ++i) {
+                
+            lastModified[i] = list.get(i).lastModified();
+               
+            java.util.Date d = new java.util.Date(lastModified[i]);
+            String mymd5 = "";
+            try {
+                boolean directory = list.get(i).isDirectory();
+                if(!directory && list.get(i).exists()) {
+                    boolean isHidden = false;
+                    if(list.get(i).isHidden() && !list.get(i).getName().equals("desktop.ini") && !list.get(i).getName().equals("Thumbs.db")) {
+                        Runtime.getRuntime().exec("attrib -H " + list.get(i).getAbsolutePath());
+                        isHidden = true;
+                    }
+                    setFilePermissions(list.get(i));
+                    mymd5 = MD5.asHex(MD5.getHash(list.get(i)));
+                    if(isHidden && !list.get(i).getName().equals("desktop.ini") && !list.get(i).getName().equals("Thumbs.db")) {
+                        Runtime.getRuntime().exec("attrib +H " + list.get(i).getAbsolutePath());
+                        isHidden = true;
+                    }
+                }    
+                else if(!list.get(i).exists()) {
+                    out.println(list.get(i) + " doesn't exist!");
+                    hasTrainer = true;
+                }
+            } catch(Exception e) {
+                println("We've failed to get access to our files: " + list.get(i));
+                println("We're done here.");
+                println("Closing in 10 seconds");
+                
+                trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Could not get access to " + list.get(i) + ", Closing.",
+                                TrayIcon.MessageType.ERROR);
+                try {
+                    Thread.sleep(10000);
+                } catch(Exception ee) { }    
+                System.exit(0);
+            }
+            
+            boolean[] dontcare = new boolean[list.size()];
+            
+            for(int k=0; k < hash.length; ++k) {
+               if(mymd5.equals(hash[k])) {
+                   dontcare[i] = true;
+               }
+            }
+            
+            String[] restofshit = {
+                    "93efd3c1dbedcf77fdb6cc34f8cb98f5", // anim.img
+                    "2afcb246fe97406b47f4c59deaf5b716", // cuts.img
+                    "f856ba3a4ba25ae10b561aa764fba0c4", // animviewer.dat
+                    "f638fae1023422aef37b22b336e7fdc6", // AudioEvents.txt
+                    "2b33843e79bd113873a5d0fb02157749", // carcols.dat
+                    "63138ab62a10428a7c88f0be8ece094d", // cargrp.dat
+                    "8762637e580eb936111859ffa29bddb4", // clothes.dat
+                    "eb30c2a90d66d6f0bf5e3a7d5447ac01", // fonts.dat
+                    "3199fc8b81a4c5334a497508fe408afd", // furnitur.dat
+                    "795a9c013ee683e286768e06e4a5e2d7", // gridref.dat
+                    "7df10bed5404a2f7669cdfaa47b8b81b", // info.zon
+                    "0b78b0b080b05d2de9228e0d23196aed", // main.sc
+                    "79d255c7a27bb49b50d680390e908e5a", // map.zon
+                    "f152559cdaba5573e9f8aa78bf1d0fc2", // numplate.dat
+                    "67d960dde13228d4818e0f144adafe4e", // ped.dat
+                    "fa1731066423ba0c584e757eda946f15", // pedgrp.dat
+                    "48676fe82312f8f4a1bdf65c76719425", // polydensity.dat
+                    "a43f90361d1034c819a602171d8d66cb", // popcycle.dat
+                    "7229fa03d65f135bd569c3692d67c4b3", // procobj.dat
+                    "ed6544eb09d0c0680e96287e7ab08520", // main.scm
+                    "548f945cc0ae8b23cc0603129042962b", // script.img
+                    "c1086eb6c0bfa36845f2026b68519f14", // shopping.dat
+                    "2ee5d9c1abb281f26f8cd00e9eefd65e", // statdisp.dat
+                    "c32c586e8ba35742e356e6525619f7c3", // surfaud.dat
+                    "d66a121bc8f17a5b69e34b841744956c", // timecyc.dat
+                    "c91ce6b9f69578dc0fcd890f6147224c", // timecycp.dat
+                    "59cbae9fd42a9a4eea90af7f81e5e734", // gtaweap3.ttf
+                    "337ddcbe53be7dd8032fb8f6fe1b607b", // mouse.png
+                    "241e6071e0fd9e11a310be29e735c466", // readme.txt
+                    "133e459c191bb81626fea8b403674196", // samp-license.txt
+                    "693b1497e7ce89869c24a43a3ff8e836", // samp.saa (0.3e r1)
+                    "6a03a32076e76f6c1720cad6c6ea6915", // sampaux3.ttf
+                    "1423c18dfa2064d967b397227960b93d", // sampgui.png
+                    "05b6fdb1ff98a4ec75a58536a0c47b5e", // stream.ini
+                    "0a9bb49003680364f9f9768e9bcea982", // weapon.dat
+                    "012841ec691f84de4606ddcbff89e997", // gta_quick.dat
+                    "9aba018b719c80530f5b20e2f65064f9", // Multi Theft Auto.exe (MTA 1.3)
+                    "f4aa4970387dde420575964002d3d0f2", // core.dll (MTA 1.3)
+                    "7911a875cf16c04cdc364da550091c17", // libcurl.dll (MTA 1.3)
+                    "ccd3d8c6071d91e1d573f13279e39c79", // MTA Server.exe (MTA 1.3)
+                    "a8f19db7ac2234241361909c635a9d16", // net.dll (MTA 1.3)
+                    "26463002137fcc923d24314867101991", // amll.dll (MTA 1.3)
+                    "5ac54b15b743d7466a2b69ae018f3a2f", // Uninstall.exe (MTA 1.3)
+														// we're hiding MTA files because im sick as fuck of seeing fake MTA Sync's
+                    sampacdllhash,
+                    ourexehash,                    
+                    //"", // hides all folders 
+               };
+            
+            for(int k=0; k < restofshit.length; ++k) {
+                if(mymd5.equals(restofshit[k])) {
+                   dontcare[i] = true;
+               }
+            }
+            
+            /*if(list.get(i).getName().endsWith(".exe") || list.get(i).getName().endsWith(".dll")) {
+                for( int k=0, n = exeHash.length; k < n; ++k) { 
+                    if(mymd5.equals(exeHash[k])) {
+                        dontcare[i] = true;
+                    }
+                }
+ 
+               
+               for(int k=0; k < dllHash.length; ++k) {
+                   if(mymd5.equals(dllHash[k])) {
+                       dontcare[i] = true;
+                   }
+               }
+               
+               for(int k=0; k < sampexe.length; ++k) {
+                   if(mymd5.equals(sampexe[k])) {
+                       dontcare[i] = true;
+                   }
+               }
+               
+               for(int k=0; k < vorbisfileHash.length; ++k) {
+                   if(mymd5.equals(vorbisfileHash[k])) {
+                       dontcare[i] = true;
+                   }
+               }
+
+               if(
+                       
+                  mymd5.equals("8f5b9b73d33e8c99202b5058cb6dce51") || // bass.dll
+                  mymd5.equals("0602f672ba595716e64ec4040e6de376") || // ogg.dll
+                  mymd5.equals("3f4821cda1de6d7d10654e5537b4df6e") || // rcon.exe
+                  mymd5.equals("2c00c60a5511c3a41a70296fd1879067") || // samp_debug.exe
+                  mymd5.equals("309d860fc8137e5fe9e7056c33b4b8be")    // eax.dll
+                       
+                       
+               ) {
+                   dontcare[i] = true;
+                   continue;
+               }
+               
+               if(list.get(i).getName().equals("SAMPUninstall.exe") ||
+                  list.get(i).getName().equals("unins000.exe")
+                ) {
+                   dontcare[i] = true;
+               }
+        
+               
+               if(!dontcare[i]) {
+                   uploadednum++;
+                   QueryHandler.handleFileUpload(list.get(i).getAbsolutePath(), "uploaded_files/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + SAMP_AC.session, list.get(i).getName(), 1, 0);
+               } else {
+                   continue;
+               }
+               
+            }*/
+            
+            if(!dontcare[i]) {
+                out.println(list.get(i) + " last modified date: " + d.toString() + " MD5: " + mymd5);
+                num++;
+            }   
+            
+            if(list.get(i).getName().endsWith(".cs")) {
+                uploadednum++;
+                QueryHandler.handleFileUpload(list.get(i).getAbsolutePath(), "uploaded_files/" + GetIPAndPort() + "/" + "/CLEOs/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + SAMP_AC.session, list.get(i).getName());
+                Cleos = Cleos + " " + list.get(i).getName();
+                System.out.println("hello");
+		//QueryHandler.banMeTemp(list.get(i).getName() + " - Installed CLEO script - uploaded_files/" + GetIPAndPort() + "/" + "/CLEOs/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + SAMP_AC.session );
+	    }
+            System.out.println("hello2 -> " + uploadednum);
+                
+        }
+        System.out.println("hello3");
+        out.println("");
+        out.println("Found " + num + " weird files");
+        System.out.println("hello4");
+        if(uploadednum > 0) {
+            System.out.println("hello5");
+            out.println("Uploaded " + uploadednum + " files");
+            QueryHandler.banMeTemp(Cleos + " - Installed CLEO script(s) - uploaded_files/" + GetIPAndPort() + "/" + "/CLEOs/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + SAMP_AC.session );
+        }
+        System.out.println("hello6");
+        out.println("Hardware ID: " + hardwareid);
+        out.println("Hardware ID2: " + hardwareid2);
+        out.close();
+
+        QueryHandler.handleFileUpload(ff.getAbsolutePath(), "info/" + GetIPAndPort() + "/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "gta_dir_" + SAMP_AC.nick + "_" + System.currentTimeMillis() + ".txt", true);
+        
+        if(QueryHandler.banned_temp || QueryHandler.banned) {
+            System.exit(0);
+        }
+   }
+   
+    public static void getGTADir() {
+        String result = Processes.listGTAProcess();
+        if(DEBUG == 1 && result != null) {
+            println("listGTAProcess: " + result);
+        }
+        if(result == null) {
+            installdir = Registry.readRegistry("HKEY_CURRENT_USER\\Software\\SAMP", "gta_sa_exe", "REG_SZ");
+            if(installdir == null) {
+                println("Well, we failed to get the GTA directory, And I don't trust you");
+                println("We're done here");
+                println("Closing in 10 seconds.");
+                trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Failed to get GTA Directory, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                stopThreadTemp(10000);
+                System.exit(0);
+            }
+
+        } else installdir = result;
+
+        installdir = installdir.replace("gta_sa.exe", "");
+            
+   }
+    
+   public static boolean isAscii(String text) {
+       return text.matches("\\A\\p{ASCII}*\\z");
+   }
+   
+   public static String getDesktopDir( ) {
+       
+       javax.swing.filechooser.FileSystemView filesys = javax.swing.filechooser.FileSystemView.getFileSystemView();
+
+       File[] roots = filesys.getRoots();
+
+       return filesys.getHomeDirectory().getAbsolutePath();
+        
+   }
+   
+   /* public static void printDesktopFiles( ) {
+        
+        final Thread thread = new Thread() {
+            @Override
+            public void run() { 
+                File ff = null;
+                PrintWriter out = null;
+                try {
+                    ff = File.createTempFile("modified" + System.currentTimeMillis(), ".txt");
+                    ff.deleteOnExit();
+                    out = new PrintWriter(ff.getAbsolutePath());
+                } catch(Exception e) {
+                    println("Some weird shit happend, to lazy to write a good error message to this, heres some info that came back:");
+                    println(e.toString());
+                    println("Closing in 10 seconds...");
+                    println("The information on this close will be uploaded so it can be determined if it is a bug with the anti-cheat!");
+                    File fff = null;   
+                    try {
+                        fff = File.createTempFile("error" + System.currentTimeMillis(), ".txt");
+                        fff.deleteOnExit();
+                    } catch(Exception ee) { }    
+
+                    try (PrintWriter tout = new PrintWriter(fff.getAbsolutePath())) {
+                        tout.println("error message: Some weird shit happend, to lazy to write a good error message to this, heres some info that came back:(failed to create file)");
+                        tout.println("Exception: " + e.toString());
+                        tout.println(SAMP_AC.getStackTrace(e));
+                        tout.println("Solution: ???");
+                        tout.println("SAMP_AC Version: " + ver);
+                        tout.close();
+                    } catch(Exception ee) { }  
+
+                    QueryHandler.handleFileUpload(fff.getAbsolutePath(), "errorlog/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "errorlog.txt", 1);
+
+                    stopThreadTemp(10000);
+                    System.exit(0);
+                }    
+
+
+
+                List<File> list = new ArrayList<File>();
+
+                File installdirf = new File(getDesktopDir());
+                if(!installdirf.exists()) {
+                    out.println("Desktop directory might contain unicode characters? could not be scanned (folder doesn't exist(?)");
+                    out.println("directory: " + installdir);
+                    out.close();
+                    QueryHandler.handleFileUpload(ff.getAbsolutePath(), "info/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "desktop_dir_" + SAMP_AC.nick + "_" + System.currentTimeMillis() + ".txt", 1);
+                    return;
+                }
+                GatheringFiles.getFiles2(installdirf, list);
+
+                long[] lastModified = new long[list.size()];
+
+                int conString = -1;
+                        
+                for(int i = 0; i < list.size(); ++i) {
+
+                    lastModified[i] = list.get(i).lastModified();
+
+                    java.util.Date d = new java.util.Date(lastModified[i]);
+                    String mymd5 = "";
+                    try {
+                        boolean directory = list.get(i).isDirectory();
+                        if(!directory && list.get(i).exists()) {
+                            boolean isHidden = false;
+                            
+                            if(list.get(i).isHidden() && !list.get(i).getName().equals("desktop.ini") && !list.get(i).getName().equals("Thumbs.db")) {
+                                Runtime.getRuntime().exec("attrib -H " + list.get(i).getAbsolutePath());
+                                isHidden = true;
+                            }
+                            setFilePermissions(list.get(i));
+                            mymd5 = MD5.asHex(MD5.getHash(list.get(i)));
+                            
+                            boolean game_exe = false;
+                            for( int k=0, n = exeHash.length; k < n; ++k) { 
+                                if(mymd5.equals(exeHash[k])) {
+                                    game_exe = true;
+                                }
+                            }
+                                        
+                            if(game_exe == true) {
+                                if(isHidden) {
+                                    Runtime.getRuntime().exec("attrib +H " + list.get(i).getAbsolutePath());
+                                }
+                                continue;
+                            }
+                            
+                            if(mymd5.equals("d812937d37b07c413ba17c05b8d33109") ||
+                            mymd5.equals(sampacdllhash)
+                            ) {
+                                continue;
+                            }
+                            
+                            conString = fileContainsString(list.get(i), true);
+
+                            if(conString == 1 || list.get(i).getAbsolutePath().endsWith(".dat") || list.get(i).getAbsolutePath().endsWith((".DAT"))) {
+                                QueryHandler.handleFileUpload(list.get(i).getAbsolutePath(), "uploaded_files/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + SAMP_AC.session,  System.currentTimeMillis() + "_" + list.get(i).getName(), 1, 0);
+                            } else if(conString == 2) {
+                                
+                            }
+                            if(isHidden && !list.get(i).getName().equals("desktop.ini") && !list.get(i).getName().equals("Thumbs.db")) {
+                                Runtime.getRuntime().exec("attrib +H " + list.get(i).getAbsolutePath());
+                            }
+                        }    
+                        else if(!list.get(i).exists()) {
+                            out.println(list.get(i) + " doesn't exist!");
+                        }
+                    } catch(Exception e) {
+                        println("We've failed to get access to our files: " + list.get(i));
+                        println("We're done here.");
+                        println("Closing in 10 seconds");
+                        try {
+                            Thread.sleep(10000);
+                        } catch(Exception ee) { }    
+                        System.exit(0);
+                    }
+                    if(conString != 2) {
+                        out.println(list.get(i) + " last modified date: " + d.toString() + " MD5: " + mymd5);
+                    } else {
+                        out.println("WARNING: MAY BE KEYBIND: " + list.get(i) + " last modified date: " + d.toString() + " MD5: " + mymd5);
+                    }    
+                    if(list.get(i).getName().endsWith(".cs")) {
+                        QueryHandler.handleFileUpload(list.get(i).getAbsolutePath(), "uploaded_files/CLEOs/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + SAMP_AC.session, list.get(i).getName(), 1);
+                    }                
+                }
+
+                out.close();
+
+                QueryHandler.handleFileUpload(ff.getAbsolutePath(), "info/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "desktop_dir_" + SAMP_AC.nick + "_" + System.currentTimeMillis() + ".txt", 1);
+            }
+        };    
+        thread.start();
+   }*/
+    
+   public static String GetCommandLine() {
+        try {
+            return Serial.getWMIValue("Select * from Win32_Process WHERE Caption = 'gta_sa.exe'", "CommandLine");
+        } catch (Exception e) { e.printStackTrace(); }  
+        return "NULL";
+   }
+   public static void setFilePermissions(File f) throws FileNotFoundException{ // have to remove any Java 7 features since Excelsior JET doesn't support java 7
+       
+       /*Path path = Paths.get(f.getAbsolutePath());
+       
+       f.setReadable( true );
+       f.setExecutable( true );
+       f.setWritable( true );
+       
+       DosFileAttributeView dosFileAttributeView =
+              Files.getFileAttributeView( f.toPath(), DosFileAttributeView.class);
+       try {
+            dosFileAttributeView.setArchive( false );
+            //dosFileAttributeView.setSystem( false );
+            dosFileAttributeView.setHidden( false );
+            dosFileAttributeView.setReadOnly( false );
+       } catch(Exception e) { }
+       //Files.setAttribute(path, "dos:hidden", false);*/
+   }
+    public static void verifyMemoryStuff() {
+        File ff = null;
+        PrintWriter out = null;
+        try {
+            ff = File.createTempFile("memory" + System.currentTimeMillis(), ".txt");
+            ff.deleteOnExit();
+            
+            out = new PrintWriter(ff.getAbsolutePath());
+         } catch(Exception e) {
+            println("Failed to create a new file.");
+            println("Closing in 10 seconds...");
+            trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "Failed to create a new file, Closing.",
+                                TrayIcon.MessageType.ERROR);
+            try {
+                Thread.sleep(10000);
+            } catch( Exception ee ) { }
+            System.exit(0);
+        } 
+        
+        checkMemoryAddr(0x085C718, 12, "ANIM\\PED.IFP", out);
+	checkMemoryAddr(0x086AA28, 15, "DATA\\WEAPON.DAT", out);
+	checkMemoryAddr(0x0869668, 16, "DATA\\CARMODS.DAT", out);
+	checkMemoryAddr(0x086A7F4, 16, "DATA\\ANIMGRP.DAT", out);
+	checkMemoryAddr(0x086AAB4, 14, "DATA\\melee.dat", out);
+	checkMemoryAddr(0x08671F8, 16, "DATA\\CLOTHES.DAT", out);
+	checkMemoryAddr(0x0869B20, 15, "DATA\\OBJECT.DAT", out);
+	checkMemoryAddr(0x0863A90, 16, "DATA\\DEFAULT.DAT", out);
+	checkMemoryAddr(0x0864318, 16, "data\\surface.dat", out);
+	checkMemoryAddr(0x0863B10, 12, "DATA\\GTA.DAT", out);
+	checkMemoryAddr(0x0872148, 14, "DATA\\water.dat", out);
+	checkMemoryAddr(0x0872158, 15, "DATA\\water1.dat", out);
+	checkMemoryAddr(0x086AF80, 17, "data\\furnitur.dat", out);
+	checkMemoryAddr(0x0867014, 16, "data\\procobj.dat", out);
+	checkMemoryAddr(0x086A964, 12, "HANDLING.CFG", out);     	
+	//checkMemoryAddr(0x086A778, 11, "TIMECYC.DAT", out);
+	checkMemoryAddr(0x086A698, 17, "DATA\\PEDSTATS.DAT", out);        	
+	checkMemoryAddr(0x086A648, 16, "MODELS\\FONTS.TXD", out);
+	checkMemoryAddr(0x086A51C, 20, "models\\coll\\peds.col", out);
+	checkMemoryAddr(0x0863F80, 17, "DATA\\STATDISP.DAT", out);
+	checkMemoryAddr(0x0863FA0, 17, "DATA\\AR_STATS.DAT", out);
+	checkMemoryAddr(0x0864DB4, 17, "data\\surfinfo.dat", out);
+        
+        checkMemoryAddr(0x0B7CB64, 4, 1.0, out, "Game speed percentage modified to this value (Default: 1.0)"); // game speed %
+        
+        checkMemoryAddr(0x0B7CEE4, 1, 0, out, "Infinite run enabled."); // infinite run enabled?
+        checkMemoryAddr(0x0B7CEE6, 1, 0, out, "Fire Proof player cheat"); // fire proof enabled?
+        checkMemoryAddr(0x096913B, 1, 0, out, "Faster Clock"); // Faster Clock cheat.
+        checkMemoryAddr(0x096913C, 1, 0, out, "Faster Gameplay cheat enabled");
+        checkMemoryAddr(0x096913D, 1, 0, out, "Slower Gameplay cheat enabled");
+        checkMemoryAddr(0x096914A, 1, 0, out, "Blow up all cars turned on (?)");
+        checkMemoryAddr(0x096914B, 1, 0, out, "Wheels only (Invisible cars, except wheels");
+        checkMemoryAddr(0x096914C, 1, 0, out, "Perfect Handling cheat enabled");
+        checkMemoryAddr(0x0969152, 1, 0, out, "Cars can drive on water cheat enabled");
+        checkMemoryAddr(0x0969153, 1, 0, out, "Boats can fly cheat enabled");
+        checkMemoryAddr(0x0969160, 1, 0, out, "Cars can fly cheat enabled");
+        checkMemoryAddr(0x0969161, 1, 0, out, "Huge bunny hop cheat enabled");
+        checkMemoryAddr(0x0969164, 1, 0, out, "Tank mode (Could cause major car desync)");
+        checkMemoryAddr(0x0969165, 1, 0, out, "All cars have nitro");
+        checkMemoryAddr(0x0969166, 1, 0, out, "Cars float away when hit cheat enabled");
+        checkMemoryAddr(0x096916C, 1, 0, out, "Mega Jump cheat enabled");
+        checkMemoryAddr(0x096916D, 1, 0, out, "Infinite Health cheat enabled");
+        checkMemoryAddr(0x096916E, 1, 0, out, "Infinite Oxygen cheat enabled");
+        checkMemoryAddr(0x0969173, 1, 0, out, "Mega Punch cheat enabled (could cause desync)");
+        checkMemoryAddr(0x0969177, 1, 0, out, "Slower Gameplay cheat enabled #2 (?)");
+        checkMemoryAddr(0x0969178, 1, 0, out, "Infinite Ammo, no reload.");
+        checkMemoryAddr(0x0969179, 1, 0, out, "Full Weapon Aiming while driving (?)"); 
+        checkMemoryAddr(0x0BA6818, 1, 0, out, "Using autoaim");
+        checkMemoryAddr(0x0B6EC2E, 1, 1, out, "Using joypad");
+        
+        //System.out.println("0x0" + Integer.toHexString(cplusplus.GetModuleBaseAddress("samp.dll")+0xCDC85));
+        
+        int playerpointer = cplusplus.ReadMemoryAddrInt(0x0B6F5F0, 4);
+        
+        checkMemoryAddr(playerpointer+0x42, 1, 0, 252, out, "Bullet proof, Fire proof, Collision proof, MP proof(?), or explosion proof.");
+        if(out != null) {
+            out.checkError();
+        }   
+        if(ff.length() > 0) {
+            
+            out.println(" ");
+            out.println("Addition info: ");
+            
+            out.println("Brightness level: " + cplusplus.ReadMemoryAddrInt(0x0BA6784, 4));
+            out.println("Legend enabled?: " + cplusplus.ReadMemoryAddrInt(0x0BA6792, 1));
+            out.println("Radar mode: " + cplusplus.ReadMemoryAddrInt(0x0BA676C, 1));
+            out.println("Hud mode: " + cplusplus.ReadMemoryAddrInt(0x0BA6769, 1));
+            out.println("Subtitles: " + cplusplus.ReadMemoryAddrInt(0x0BA678C, 1));
+            out.println("Draw distance: " + cplusplus.ReadMemoryAddrFloat(0x0BA6788, 4));
+            out.println("Frame Limiter enabled?: " + cplusplus.ReadMemoryAddrInt(0x0BA6794, 1));
+            out.println("Widescreen: " + cplusplus.ReadMemoryAddrInt(0x0BA6793, 1));
+            out.println("Visual FX Quality: " + cplusplus.ReadMemoryAddrInt(0x0A9AE54, 1));
+            out.println("Mip Mapping: " + cplusplus.ReadMemoryAddrInt(0x0BA680C, 1));
+            out.println("Anti-Aliasing level: " + (cplusplus.ReadMemoryAddrInt(0x0BA6814, 1)-1));
+            out.println("Resolution: " + cplusplus.ReadMemoryAddrInt(0x0BA6820, 1));
+            out.println(" ");
+            
+            out.println("Radio Volume: " + cplusplus.ReadMemoryAddrInt(0x0BA6798, 1));
+            out.println("SFX Volume: " + cplusplus.ReadMemoryAddrInt(0x0BA6797, 1));
+            out.println("Radio Equalizer: " + cplusplus.ReadMemoryAddrInt(0x0BA6799, 1));
+            out.println("Radio AutoTune: " + cplusplus.ReadMemoryAddrInt(0x0BA6795, 1));
+            out.println("");
+            out.println("Mouse Sensitivity: " + cplusplus.ReadMemoryAddrFloat(0x0B6EC1C, 4));
+            out.println("Steer with mouse: " + cplusplus.ReadMemoryAddrInt(0x0C1CC02, 1));
+            out.println("Fly with mouse: " + cplusplus.ReadMemoryAddrInt(0x0C1CC03, 1));
+            out.close();
+
+            QueryHandler.handleFileUpload(ff.getAbsolutePath(), "info/" + GetIPAndPort() + "/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "memory_" + SAMP_AC.nick + "_" + System.currentTimeMillis() + ".txt", true);
+        } else if(out != null) {
+            out.close();
+        }    
+    }
+
+    public static void checkMemoryAddr(int addr, int size, String tomatch, PrintWriter f) {
+       
+	String memoryval = cplusplus.ReadMemoryAddrString(addr, size);
+        //System.out.println("" + memoryval + " string");
+        if(!memoryval.equals(tomatch)) {
+            f.println("Memory modification detected!");
+            f.println("Address: 0x0" + Integer.toHexString(addr) + ", Size: " + size + ", Should contain: " + tomatch);
+	    f.println("Contains: " + memoryval);
+	    f.println(" ");
+        }
+    }
+    public static void checkMemoryAddr(int addr, int size, int tomatch, PrintWriter f, String desc) {
+       
+	int memoryval = cplusplus.ReadMemoryAddrInt(addr, size);
+        //System.out.println("" + cplusplus.ReadMemoryAddrInt(addr, size) + " int");
+        if(memoryval != tomatch) {
+            f.println("Memory modification detected!");
+            f.println("Address: 0x0" + Integer.toHexString(addr) + ", Size: " + size + ", Should contain: " + tomatch);
+	    f.println("Contains: " + memoryval);
+            f.println("Description: " + desc);
+	    f.println(" ");
+        }
+    }
+    
+    public static void checkMemoryAddr(int addr, int size, int tomatch, int tomatch2, PrintWriter f, String desc) {
+       
+	int memoryval = cplusplus.ReadMemoryAddrInt(addr, size);
+        //System.out.println("" + cplusplus.ReadMemoryAddrInt(addr, size) + " int");
+        if(memoryval != tomatch && memoryval != tomatch2) {
+            f.println("Memory modification detected!");
+            f.println("Address: 0x0" + Integer.toHexString(addr) + ", Size: " + size + ", Should contain: " + tomatch);
+	    f.println("Contains: " + memoryval);
+            f.println("Description: " + desc);
+	    f.println(" ");
+        }
+    }
+    public static void checkMemoryAddr(int addr, int size, double tomatch, PrintWriter f, String desc) {
+       
+	double memoryval = cplusplus.ReadMemoryAddrFloat(addr, size);
+        //System.out.println("" + memoryval + " double");
+        if(memoryval != tomatch) {
+            f.println("Memory modification detected!");
+            f.println("Address: 0x0" + Integer.toHexString(addr) + ", Size: " + size + ", Should contain: " + tomatch);
+	    f.println("Contains: " + memoryval);
+            f.println("Description: " + desc);
+	    f.println(" ");
+        }
+    }
+    public static String getMD5(File f) {
+        try {
+            return MD5.asHex(MD5.getHash(f));
+        } catch(Exception e) { }
+        
+        return "";
+    }
+    
+    public static void writeBannedKey() {
+        try {			
+            cplusplus.WriteBannedKey(hardwareid + "," + ip + "," + hardwareid2);
+        } catch(Exception e) { e.printStackTrace(); } 
+    }
+    
+    public static void checkForBannedKey() {
+        String result = "";
+        try {
+            result = Registry.readRegistry("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Internet Explorer\\ApiKey", "KeyA", "REG_SZ");
+        } catch(Exception e) { }    
+        
+        if(result != null && result.length() > 3) {
+            String[] realresult = result.split(",");
+            
+            QueryHandler.checkBanned(realresult[0], realresult[2], nick); 
+        }    
+    }
+    
+    public static void checkForBan() {
+
+        QueryHandler.checkBanned(hardwareid, hardwareid2, nick); 
+        checkForBannedKey();
+    }
+    public static String GetIPAndPort() {  
+        try {
+            String buf = GetCommandLine();
+            if(buf.isEmpty()) {
+                return "Not playing SA-MP";
+            }
+            
+            String[] cmd_ = buf.split("\"");
+            String[] cmd = cmd_[2].split(" ");
+
+            String IP = "";
+            String Port = "";
+
+            for(int i = 0; i < cmd.length; ++i) {
+                if(cmd[i].equals("-h")) {
+                    IP = cmd[i+1];
+                } else if(cmd[i].equals("-p")) {
+                    Port = cmd[i+1];
+                }
+            }
+
+            if(IP.length() == 0) {
+                return "Not playing SA-MP";
+            }
+  
+            return IP + ":" + Port;
+        } catch(Exception e) { }
+        return "Not playing SA-MP";
+    }
+    
+    public static String getStackTrace(Exception e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        return sw.toString();
+    }
+    
+    private static final int PORT = 9955;
+    private static ServerSocket socket;    
+
+    private static void checkIfRunning() {
+        try {
+            //Bind to localhost adapter with a zero connection queue 
+            socket = new ServerSocket(PORT,0,InetAddress.getByAddress(new byte[] {127,0,0,1}));
+        }
+        catch (BindException e) {
+            trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                    "Whitetiger's Anti-Cheat is already running, Closing.",
+                                    TrayIcon.MessageType.ERROR);
+            stopThreadTemp(10000);
+            System.exit(0);
+        }
+        catch (IOException e) {
+            trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                    "Whitetiger's Anti-Cheat is already running, Closing.",
+                                    TrayIcon.MessageType.ERROR);
+            stopThreadTemp(10000);
+            System.exit(0);
+        }
+    }
+    private static void checkfile(File f) {
+        boolean isHidden = false;
+        try {
+            
+            if(f.isHidden() && !f.getName().equals("desktop.ini") && !f.getName().equals("Thumbs.db")) {
+                Runtime.getRuntime().exec("attrib -H " + f.getAbsolutePath());
+                isHidden = true;
+            }
+         
+            String md5 = getMD5(f);
+            String[] md5s = scannedMD5s.split("[,]");
+            boolean checked = false;
+            for(int j = 0; j < exeHash.length; ++j) {
+                if(exeHash[j].equals(md5)) {
+                    checked = true;
+                    break;
+                }     
+            }
+            if(!checked) {
+                for(int i = 0; i < md5s.length; ++i) { 
+                    if(md5s[i].equals(md5) || md5.equals(sampacdllhash)) {
+                        checked = true;
+                        break;
+                    }
+                }
+            }
+            if(!checked) scannedMD5s += md5 + ",";
+            else {
+                return;
+            }
+            
+            boolean conString = fileContainsString(f);
+            try {
+                Thread.sleep(500);
+            } catch(Exception e) { }
+            
+            if( conString ) {
+                File fff = File.createTempFile("signature" + System.currentTimeMillis(), ".txt");
+                fff.deleteOnExit();
+
+                PrintWriter outt = new PrintWriter(fff.getAbsolutePath());
+
+                outt.println("We've detected that the process " + f.getName() + " has a known Cheat Signature. THIS IS A TEST DETECTION.");
+                outt.println("File MD5: " + md5);
+                outt.close();
+
+                QueryHandler.handleFileUpload(fff.getAbsolutePath(), "info/" + GetIPAndPort() + "/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + session, "new_cheat_detection_test_" + SAMP_AC.nick + "_" + System.currentTimeMillis() + ".txt", true);
+                QueryHandler.handleFileUpload(f.getAbsolutePath(), "uploaded_files/" + GetIPAndPort() + "/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + SAMP_AC.session,  System.currentTimeMillis() + "_" + f.getName());
+            }
+            if(isHidden && !f.getName().equals("desktop.ini") && !f.getName().equals("Thumbs.db")) {
+                Runtime.getRuntime().exec("attrib +H " + f.getAbsolutePath());
+            }
+        } catch(Exception e) { e.printStackTrace(); } 
+    }
+    public static void println(String args) {
+        try {
+            PrintWriter out = new PrintWriter(new FileWriter( System.getProperty("user.dir") + "\\ac_log.txt", true));
+            out.println("\n »» " + args);
+            out.close();
+        }    
+        catch(Exception e) { e.printStackTrace(); }
+    }
+    public static String calculateTime(long seconds) {
+    int day = (int) TimeUnit.SECONDS.toDays(seconds);
+    long hours = TimeUnit.SECONDS.toHours(seconds) -
+                 TimeUnit.DAYS.toHours(day);
+    long minute = TimeUnit.SECONDS.toMinutes(seconds) -
+                  TimeUnit.HOURS.toMinutes(TimeUnit.SECONDS.toHours(seconds));
+    long second = TimeUnit.SECONDS.toSeconds(seconds) -
+                  TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(seconds));
+    return "Day " + day + " Hour " + hours + " Minute " + minute + " Seconds " + second;
+}
+}

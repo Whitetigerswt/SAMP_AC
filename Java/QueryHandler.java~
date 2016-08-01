@@ -1,0 +1,515 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+import java.awt.TrayIcon;
+import java.io.*;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.sql.Date;
+import javax.net.ssl.HttpsURLConnection;
+import java.text.*;
+
+
+/**
+ *
+ * @author My PC
+ */
+public class QueryHandler extends SAMP_AC {
+    
+    
+    private static final int ID_OFFSET = 5000;
+    
+    private static final int ID_CHECK_UPDATE        = ID_OFFSET;
+    private static final int ID_CHECK_BAN           = ID_OFFSET+1;
+    private static final int ID_SAMP_HASH           = ID_OFFSET+2;
+    private static final int ID_CHECK_PROCESS       = ID_OFFSET+3;
+    private static final int ID_CHECK_INJECTED      = ID_OFFSET+4;
+    private static final int ID_CHECK_ASI           = ID_OFFSET+5;
+    private static final int ID_GET_AUTOARENA       = ID_OFFSET+6;
+    private static final int ID_GET_THREAD_WAIT     = ID_OFFSET+7;
+    
+    public static final boolean DEBUG_PHP = true;
+    
+    public static boolean banned = false;
+    public static boolean banned_temp = false;
+    
+    public static void sendPulse(String serverinfo, double x, double y, double z) {
+        sendRawQuery("pulse.php", "serverinfo=" + serverinfo + "&x=" + x + "&y=" + y + "&z=" + z, 100);
+    }
+    
+    public static void getAutoArenaIP() {
+        try {
+            URL autoIP = new URL("https://www.sixtytiger.com/AC_API/internal/autoarena.php");
+            BufferedReader in = new BufferedReader( new InputStreamReader(autoIP.openStream()));
+            String ip_address = (in.readLine()).trim();
+
+            SAMP_AC.AutoArenaIP = ip_address;
+
+        } catch(Exception e) {  }
+    }
+    
+    public static void getThreadWait() {        
+        try {
+            URL autoIP = new URL("https://www.sixtytiger.com/AC_API/internal/thread_wait.php");
+            BufferedReader in = new BufferedReader( new InputStreamReader(autoIP.openStream()));
+            String ip_address = (in.readLine()).trim();
+
+            SAMP_AC.THREAD_WAIT = Integer.parseInt(ip_address);
+
+        } catch(Exception e) {  }
+    }
+    
+    public static void sendInsertPlayer(String Player, String ConnectedIP) {
+        Player = Player.replace("&", "");
+        ConnectedIP = ConnectedIP.replace("&", "");
+        
+        sendRawQuery("insert_player.php", "Player=" + Player + "&ConnectedIP=" + ConnectedIP, 5);
+    }
+
+    
+    public static void requestUpdate() {
+        DecimalFormat df = new DecimalFormat("#.00");
+        sendRawQuery("update.php", "ver=" + df.format(SAMP_AC.ver), ID_CHECK_UPDATE);
+    }
+    public static void sendShutdown() {
+        sendRawQuery("shutdown.php", "", 0);
+    }
+    
+    public static void sendResults(java.util.List<String> files, boolean asi, boolean trainer, String ConnectedIP, String session) {
+        String postdata = "ASI=" + asi + "&Trainer=" + trainer + "&ConnectedIP=" + ConnectedIP.replace("&", "") + "&session=" + session.replace("&", "");
+        
+        for(int i=0; i < files.size(); ++i) {
+            postdata = postdata + "&file_" + i + "=" + files.get(i);
+        }
+        sendRawQuery("results.php", postdata, 5);
+    }
+    
+    public static void checkBanned(String HardwareID, String HardwareID2, String Name) {
+        sendRawQuery("check_banned.php", "Name=" + Name, ID_CHECK_BAN);
+    }
+    
+    public static void sendProcesses(String processes, String fnames, String nick, String session) {
+        sendRawQuery("check_processes.php", "Processes=" + processes.replace("&", "") + "&fnames=" + fnames.replace("&", "") + "&Name=" + nick.replace("&", "") + "&session=" + session.replace("&", ""), ID_CHECK_PROCESS);
+    }
+    public static void sendInjectedLibrarys(String libs, String fnames, String nick, String session) {
+        sendRawQuery("check_injected.php", "Injected=" + libs.replace("&", "") + "&fnames=" + fnames.replace("&", "") + "&Name=" + nick.replace("&", "") + "&session=" + session.replace("&", ""), ID_CHECK_INJECTED);
+    }
+    
+    public static void sendASILibrarys(String libs, File file, String nick, String session) {
+        sendRawQuery("check_asi.php", "ASI=" + libs.replace("&", "") + "&Name=" + nick.replace("&", "") + "&session=" + session.replace("&", ""), ID_CHECK_ASI, file);
+    }
+    
+    public static void banMe(String reason, String session) {
+        if(banned) return;
+        sendRawQuery("ban_me.php", "Name=" + nick.replace("&", "") + "&reason=" + reason.replace("&", "") + "&session=" + session.replace("&", ""), 1);
+        writeBannedKey();
+        banned = true;
+    }
+    
+    public static void banMeTemp(String reason, String session) {
+        if(banned || banned_temp) return;
+        sendRawQuery("ban_me_temp.php", "Name=" + nick.replace("&", "") + "&reason=" + reason.replace("&", "") + "&session=" + session.replace("&", ""), 5);
+        writeBannedKey();
+        banned_temp = true;
+    }
+    
+    public static void requestDataFiles() {
+        // future proof for new SA-MP versions, don't need to update AC, just update MySQL.
+        
+        sendRawQuery("samphash.php", "", ID_SAMP_HASH);
+    }
+    public static void getThreadQueryWait() {
+        try {
+            URL autoIP = new URL("https://www.sixtytiger.com/AC_API/internal/query_bug_thread_wait.php");
+            BufferedReader in = new BufferedReader( new InputStreamReader(autoIP.openStream()));
+            String ip_address = (in.readLine()).trim();
+
+            SAMP_AC.QUERY_BUG_THREAD_WAIT = Integer.parseInt(ip_address);
+
+        } catch(Exception e) {  }
+    }
+    public static String getMyPublicIP() {
+        try {
+            URL autoIP = new URL("https://www.sixtytiger.com/AC_API/internal/MyIP.php");
+            BufferedReader in = new BufferedReader( new InputStreamReader(autoIP.openStream()));
+            String ip_address = (in.readLine()).trim();
+                
+            return ip_address;
+ 
+         }catch (Exception e){
+             
+                // try another site!
+             
+            try {
+                URL autoIP = new URL("http://api.externalip.net/ip/");
+                BufferedReader in = new BufferedReader( new InputStreamReader(autoIP.openStream()));
+                String ip_address = (in.readLine()).trim();
+
+                return ip_address;
+            } catch(Exception eee) {
+                try {
+                    URL autoIP = new URL("http://checkip.dyndns.org:8245/");
+                    BufferedReader in = new BufferedReader( new InputStreamReader(autoIP.openStream()));
+                    String ip_address = (in.readLine()).trim();
+
+                    ip_address = ip_address.replace("<html><head><title>Current IP Check</title></head><body>Current IP Address: ", "");
+
+                    ip_address = ip_address.replace("</body></html>", "");
+
+                    return ip_address;
+                } catch(Exception ee) { ee.printStackTrace(); }    
+                e.printStackTrace();
+
+                return "ERROR";
+                
+            }
+        }
+    }
+    
+    private static void sendRawQuery(String relative_url, String postdata, int ID, File file) {
+        if(DEBUG_PHP) { 
+            System.out.println(relative_url);
+        }
+        if(postdata.isEmpty()) {
+            postdata = "APIKey=" + SAMP_AC.ourexehash.replace("&", "") + "&IP=" + SAMP_AC.ip.replace("&", "") + "&HardwareID=" + SAMP_AC.hardwareid.replace("&", "") + "&HardwareID2=" + SAMP_AC.hardwareid2.replace("&", "");
+        } else {
+            postdata = postdata + "&APIKey=" + SAMP_AC.ourexehash.replace("&", "") + "&IP=" + SAMP_AC.ip.replace("&", "") + "&HardwareID=" + SAMP_AC.hardwareid.replace("&", "") + "&HardwareID2=" + SAMP_AC.hardwareid2.replace("&", "");
+        }
+
+        try {
+            URL url = null;
+        
+            if(DEBUG_PHP) {
+                url = new URL("https://www.sixtytiger.com/AC_API/internal/debug/" + relative_url);
+            } else {
+                url = new URL("https://www.sixtytiger.com/AC_API/internal/" + relative_url);
+            }
+            HttpsURLConnection   urlConn =  (HttpsURLConnection) url.openConnection();
+            
+            DataOutputStream    printout;
+            // Let the run-time system (RTS) know that we want input.
+            urlConn.setDoInput (true);
+            // Let the RTS know that we want to do output.
+            urlConn.setDoOutput (true);
+            // No caching, we want the real thing.
+            urlConn.setUseCaches (false);
+            // Specify the content type.
+            urlConn.setRequestProperty
+            ("Content-Type", "application/x-www-form-urlencoded");
+            // Send POST output
+            
+            urlConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.5) Gecko/2008120122 Firefox/3.0.5");  
+
+            urlConn.connect();
+        
+            printout = new DataOutputStream (urlConn.getOutputStream ());
+            printout.writeBytes (postdata);
+            printout.flush ();
+            printout.close ();
+            
+            // Get response data.
+            BufferedReader input = new BufferedReader(new InputStreamReader(urlConn.getInputStream ()));
+            if(ID != 0) {
+                
+                String str;
+                while (null != ((str = input.readLine())))
+                {
+                    handleResult(ID, str, file);
+                }
+                
+            }
+            input.close ();
+        } catch(javax.net.ssl.SSLHandshakeException e) {
+
+            SAMP_AC.println( new java.util.Date().toString() + " is not the current date, change your system time and restart.");
+			
+	    System.exit(0);
+        } catch(Exception e) { 
+            // wait 10 seconds, and try again, until it works
+            e.printStackTrace();
+            stopThreadTemp(10000);
+            sendRawQuery(relative_url, postdata, ID);
+        }
+    }
+    
+    private static void sendRawQuery(String relative_url, String postdata, int ID) {
+        if(DEBUG_PHP) { 
+            System.out.println(relative_url);
+        }
+        if(postdata.isEmpty()) {
+            postdata = "APIKey=" + SAMP_AC.ourexehash.replace("&", "") + "&IP=" + SAMP_AC.ip.replace("&", "") + "&HardwareID=" + hardwareid.replace("&", "") + "&HardwareID2=" + hardwareid2.replace("&", "");
+        } else {
+            postdata = postdata + "&APIKey=" + SAMP_AC.ourexehash.replace("&", "") + "&IP=" + SAMP_AC.ip.replace("&", "") + "&HardwareID=" + hardwareid.replace("&", "") + "&HardwareID2=" + hardwareid2.replace("&", "");
+        }
+
+        try {
+            URL url = null;
+        
+            if(DEBUG_PHP) {
+                url = new URL("https://www.sixtytiger.com/AC_API/internal/debug/" + relative_url);
+            } else {
+                url = new URL("https://www.sixtytiger.com/AC_API/internal/" + relative_url);
+            }
+            HttpsURLConnection   urlConn =  (HttpsURLConnection) url.openConnection();
+            
+            DataOutputStream    printout;
+            // Let the run-time system (RTS) know that we want input.
+            urlConn.setDoInput (true);
+            // Let the RTS know that we want to do output.
+            urlConn.setDoOutput (true);
+            // No caching, we want the real thing.
+            urlConn.setUseCaches (false);
+            // Specify the content type.
+            urlConn.setRequestProperty
+            ("Content-Type", "application/x-www-form-urlencoded");
+            // Send POST output
+            
+            urlConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.5) Gecko/2008120122 Firefox/3.0.5");  
+
+            urlConn.connect();
+        
+            printout = new DataOutputStream (urlConn.getOutputStream ());
+            printout.writeBytes (postdata);
+            printout.flush ();
+            printout.close ();
+            
+            // Get response data.
+            BufferedReader input = new BufferedReader(new InputStreamReader(urlConn.getInputStream ()));
+            if(ID != 0) {
+                
+                String str;
+                while (null != ((str = input.readLine())))
+                {
+                    handleResult(ID, str);
+                }
+                
+            }
+            input.close ();
+        } catch(javax.net.ssl.SSLHandshakeException e) {
+
+            SAMP_AC.println( new java.util.Date().toString() + " is not the current date, change your system time and restart.");
+			
+	    System.exit(0);
+        } catch(Exception e) { 
+            // wait 10 seconds, and try again, until it works
+            e.printStackTrace();
+            stopThreadTemp(10000);
+            sendRawQuery(relative_url, postdata, ID);
+        }
+    }
+    public static void handleFileUpload(final String path, final String topath, final String filename, final boolean delete) {
+        try {
+            HttpsURLConnection httpUrlConnection = (HttpsURLConnection)new URL("https://www.sixtytiger.com/AC_API/internal/upload.php?path=" + URLEncoder.encode(topath, "UTF-8") + "&fname=" + URLEncoder.encode(filename, "UTF-8")).openConnection();
+            httpUrlConnection.setDoOutput(true);
+            httpUrlConnection.setUseCaches (false);
+            httpUrlConnection.setRequestMethod("POST");
+            OutputStream os = httpUrlConnection.getOutputStream();
+            BufferedInputStream fis = new BufferedInputStream(new FileInputStream(path));
+
+            int i = 0;
+            byte[] buffer = new byte[1];
+            int length;
+            while ((length = fis.read(buffer)) != -1) {
+               os.write(buffer);
+            }
+
+            os.close();
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(
+                    httpUrlConnection.getInputStream()));
+
+            String s = null;
+            while ((s = in.readLine()) != null) {
+                //System.out.println(s);
+            }
+            in.close();
+            fis.close();
+
+            if(delete) {
+                new File(path).delete();
+            }
+        } catch(Exception e) { }
+    }
+    
+    public static void handleFileUpload(final String path, final String topath, final String filename) {
+        try {
+            HttpsURLConnection httpUrlConnection = (HttpsURLConnection)new URL("https://www.sixtytiger.com/AC_API/internal/upload.php?path=" + URLEncoder.encode(topath, "UTF-8") + "&fname=" + URLEncoder.encode(filename, "UTF-8")).openConnection();
+            httpUrlConnection.setDoOutput(true);
+            httpUrlConnection.setUseCaches (false);
+            httpUrlConnection.setRequestMethod("POST");
+            OutputStream os = httpUrlConnection.getOutputStream();
+            BufferedInputStream fis = new BufferedInputStream(new FileInputStream(path));
+
+            int i = 0;
+            byte[] buffer = new byte[1];
+            int length;
+            while ((length = fis.read(buffer)) != -1) {
+               os.write(buffer);
+            }
+
+            os.close();
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(
+                    httpUrlConnection.getInputStream()));
+
+            String s = null;
+            while ((s = in.readLine()) != null) {
+                //System.out.println(s);
+            }
+            in.close();
+            fis.close();
+
+        } catch(Exception e) { }
+    }
+    
+    public static void handleResult(int ID, String result, File file) {
+        if(DEBUG_PHP) {
+            System.out.println("QueryHandler Result: " + result);
+        }
+        
+        if(ID == ID_CHECK_ASI) {
+            if(result.equals("it's all good it's all good")) {
+                return;
+            } else {
+                QueryHandler.handleFileUpload(file.getAbsolutePath(), "uploaded_files/" + SAMP_AC.GetIPAndPort() + "/ASIs/" + SAMP_AC.nick + "_" + SAMP_AC.ip + "_" + SAMP_AC.session, file.getName());
+                SAMP_AC.hasNotAllowedASI = true;
+            }
+        }
+    }
+    public static void handleResult(int ID, String result) {
+        if(DEBUG_PHP) {
+            System.out.println("QueryHandler Result: " + result);
+        }
+        if(ID == ID_CHECK_UPDATE) {
+            if(result.equals("Already up to date!")) {
+
+            } else {
+                String[] dl = result.split("[ ]");
+                try {
+                    Download.downloadUpdate(dl[1], Double.parseDouble(dl[0]));
+                } catch(Exception e) { 
+                    SAMP_AC.trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                            "Update failed to complete, Download the latest version at www.sixtytiger.com/tiger/ac_files/, Closing.",
+                            TrayIcon.MessageType.ERROR);
+                    SAMP_AC.println("Update failed to complete, Download the latest version at www.sixtytiger.com/tiger/ac_files/");
+                    SAMP_AC.println(e.toString());
+                    e.printStackTrace();
+                    stopThreadTemp(10000);
+                    System.exit(0);
+                }
+            }
+        }
+        else if(ID == ID_SAMP_HASH) {
+            if(result.equals("Unknown")) { return; }
+            
+            String[] str = result.split("[ ]");
+            
+            
+            SAMP_AC.sampsaa = str[0].split("[,]");
+            SAMP_AC.sampexe = str[1].split("[,]");
+            SAMP_AC.dllHash = str[2].split("[,]");
+            
+        } 
+
+        else if(ID == ID_CHECK_PROCESS || ID == ID_CHECK_INJECTED) {
+            if(result.equals("it's all good")) {
+                return;
+            } else {
+                trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                    "You're banned from using Whitetiger's Anti-Cheat, Closing.",
+                                    TrayIcon.MessageType.ERROR);
+                SAMP_AC.println("You're banned from using Whitetiger's Anti-Cheat, Closing.");
+                stopThreadTemp(10000);
+                System.exit(0);
+            }
+        }
+        
+        else if(ID == ID_GET_AUTOARENA) {
+            SAMP_AC.AutoArenaIP = result;
+        }
+        
+        else if(ID == ID_GET_THREAD_WAIT) {
+            SAMP_AC.THREAD_WAIT = Integer.parseInt(result);
+        }
+        
+        else if(ID == ID_CHECK_BAN) {
+            if(result.equals("Not banned.")) {
+                                   
+            } else if(result.equals("Ignored Name")) {
+                watchForBan = true;
+                    
+            } else if(result.equals("api keys not matching.No.")) {
+                trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                    "Version mismatch, reinstall Anti-Cheat, Closing.",
+                                    TrayIcon.MessageType.ERROR);
+                SAMP_AC.println("Version mismatch, Reinstall Whitetiger's Anti-Cheat.");
+                stopThreadTemp(10000);
+                System.exit(0);
+            }
+            
+            else if(result.equals("Maintenance")) {
+
+                trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                    "Whitetiger's Anti-Cheat is currently under maintenance, please try again later, Closing.",
+                                    TrayIcon.MessageType.ERROR);
+                SAMP_AC.println("Whitetiger's Anti-Cheat is under maintenance.");
+                stopThreadTemp(10000);
+                System.exit(0);
+            } else {
+                String[] ban = result.split("[ ]");
+                try {
+                        
+                    long tstamp = 0;
+                    try {
+                        tstamp = Integer.parseInt(ban[1]);
+                    } catch(java.lang.NumberFormatException e) {
+                        tstamp = 0;
+                    }
+                        
+                    if(tstamp != 0) {
+                        
+                        writeBannedKey();
+                        Date d = new Date((tstamp) * 1000);
+                        SAMP_AC.println("You are temporarily banned from using the anti-cheat until " + d.toString());
+                        SAMP_AC.println("Hello " + nick + "! You are caught in the ban for " + ban[0] + ".");
+                        SAMP_AC.println("If this is an error, visit www.u-army.com");
+
+                        SAMP_AC.println("Closing in 10 seconds...");
+                        trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                    "You are temporarily banned from using the anti-cheat until " + d.toString() + ", Closing.",
+                                    TrayIcon.MessageType.ERROR);
+                        stopThreadTemp(10000);
+                        System.exit(0);
+                    } else {
+                        writeBannedKey();
+                        SAMP_AC.println("Hello " + nick + "! You are caught in the ban for " + ban[0] + ".");
+                        SAMP_AC.println("If this is an error, visit www.sixtytiger.com");
+                        SAMP_AC.println("Closing in 10 seconds...");
+                        trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                    "You're banned from using Whitetiger's Anti-Cheat, Closing.",
+                                    TrayIcon.MessageType.ERROR);
+                        stopThreadTemp(10000);
+                        System.exit(0);
+                    }
+                     
+                } catch (Exception e) {
+                    SAMP_AC.println(SAMP_AC.getStackTrace(e));
+                    writeBannedKey();
+                    SAMP_AC.println("Hello " + nick + "! You are caught in the ban for <<<Unknown>>>.");
+                    SAMP_AC.println("If this is an error, visit www.u-army.com");
+                    SAMP_AC.println("Closing in 10 seconds...");
+                    trayIcon.displayMessage("Whitetiger's Anti-Cheat", 
+                                "You're banned from using Whitetiger's Anti-Cheat, Closing.",
+                                TrayIcon.MessageType.ERROR);
+                    stopThreadTemp(10000);
+                    try { 
+                        SAMP_AC.println("Attempting to find banned player one more time: " + ban[0]);
+                    } catch(Exception ee) { System.exit(0); }
+                    System.exit(0);
+                }
+            }
+        }
+    }   
+}

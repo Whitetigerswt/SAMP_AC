@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ac", "ac_test1\ac_test1.vcxproj", "{B8053CCB-43AC-46B9-AC2A-8CD02D0147D8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "d3d9", "d3d9\d3d9.vcxproj", "{CDD7E7AE-E583-4458-BEB5-FCAE90BCCC77}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B8053CCB-43AC-46B9-AC2A-8CD02D0147D8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B8053CCB-43AC-46B9-AC2A-8CD02D0147D8}.Debug|Win32.Build.0 = Debug|Win32
+		{B8053CCB-43AC-46B9-AC2A-8CD02D0147D8}.Release|Win32.ActiveCfg = Release|Win32
+		{B8053CCB-43AC-46B9-AC2A-8CD02D0147D8}.Release|Win32.Build.0 = Release|Win32
+		{CDD7E7AE-E583-4458-BEB5-FCAE90BCCC77}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CDD7E7AE-E583-4458-BEB5-FCAE90BCCC77}.Debug|Win32.Build.0 = Debug|Win32
+		{CDD7E7AE-E583-4458-BEB5-FCAE90BCCC77}.Release|Win32.ActiveCfg = Release|Win32
+		{CDD7E7AE-E583-4458-BEB5-FCAE90BCCC77}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
